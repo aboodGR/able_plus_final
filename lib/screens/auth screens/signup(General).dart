@@ -6,7 +6,9 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class GeneralSignup extends StatefulWidget {
-  const GeneralSignup({super.key});
+  final String selectedUserType;
+
+  const GeneralSignup({super.key, required this.selectedUserType});
 
   @override
   State<GeneralSignup> createState() => _GeneralSignupState();
@@ -15,8 +17,6 @@ class GeneralSignup extends StatefulWidget {
 class _GeneralSignupState extends State<GeneralSignup> {
   final _formkey = GlobalKey<FormState>();
   final supabase = Supabase.instance.client;
-
-  String? selectedUserType = 'user';
 
   final fullNameController = TextEditingController();
   final usernameController = TextEditingController();
@@ -37,7 +37,7 @@ class _GeneralSignupState extends State<GeneralSignup> {
     final username = usernameController.text.trim();
     final email = emailController.text.trim().toLowerCase();
     final password = passwordController.text;
-    final userType = selectedUserType!.trim();
+    final userType = widget.selectedUserType.trim();
 
     setState(() => isloading = true);
 
@@ -242,11 +242,10 @@ class _GeneralSignupState extends State<GeneralSignup> {
                     key: _formkey,
                     child: Column(
                       children: [
-                        const SizedBox(height: 14),
+                        const SizedBox(height: 8),
                         Image.asset(
                           AbleTheme.logoAsset,
-                          width: 150,
-                          height: 150,
+                         
                           fit: BoxFit.contain,
                         ),
                         const SizedBox(height: 18),
@@ -386,7 +385,7 @@ class _GeneralSignupState extends State<GeneralSignup> {
                                         const SizedBox(width: 8),
                                         Expanded(
                                           child: Text(
-                                            selectedUserType == 'user'
+                                            widget.selectedUserType == 'user'
                                                 ? 'Location permission will be requested during onboarding.'
                                                 : 'This account type requires document review before it becomes active.',
                                             style: TextStyle(
@@ -438,7 +437,7 @@ class _GeneralSignupState extends State<GeneralSignup> {
                                               ),
                                             )
                                           : Text(
-                                              selectedUserType == 'user'
+                                              widget.selectedUserType == 'user'
                                                   ? 'Create account'
                                                   : 'Continue to verification',
                                               style: const TextStyle(
@@ -451,7 +450,7 @@ class _GeneralSignupState extends State<GeneralSignup> {
                                   const SizedBox(height: 14),
                                   Center(
                                     child: GestureDetector(
-                                      onTap: () => context.pop(),
+                                      onTap: () => context..push('/login'),
                                       child: Text.rich(
                                         TextSpan(
                                           text: 'Already have an account? ',

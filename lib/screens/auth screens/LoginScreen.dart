@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:ableplusproject/screens/auth screens/ForgotPasswordEmailPage.dart';
+import 'package:ableplusproject/screens/auth%20screens/OTP%20things/ForgotPasswordEmailPage.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -218,7 +218,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                         builder: (context) => const ForgotPasswordEmailPage(),
+                                         builder: (context) => ForgotPasswordEmailPage(),
                                        
                                         ),
                                       );

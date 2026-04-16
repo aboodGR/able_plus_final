@@ -1,4 +1,7 @@
+import 'package:ableplusproject/screens/auth%20screens/OTP%20things/ForgotPasswordEmailPage.dart';
 import 'package:ableplusproject/screens/auth%20screens/LoginScreen.dart';
+import 'package:ableplusproject/screens/auth%20screens/OTP%20things/OtpVerificationPage.dart';
+import 'package:ableplusproject/screens/auth%20screens/OTP%20things/ResetPasswordPage.dart';
 import 'package:ableplusproject/screens/auth%20screens/UserType.dart';
 import 'package:ableplusproject/screens/auth%20screens/signup(General).dart';
 import 'package:ableplusproject/screens/auth%20screens/signup(businesses).dart';
@@ -8,7 +11,6 @@ import 'package:go_router/go_router.dart';
 import 'package:ableplusproject/providers/Auth_provider.dart';
 import 'package:ableplusproject/providers/theme_providers.dart';
 import 'package:ableplusproject/theme/App_theme.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -67,7 +69,8 @@ class AblePlusApp extends ConsumerWidget {
             isSignupRoute ||
             isForgetPasswordRoute ||
             isResetPasswordRoute ||
-            isOtpRoute||isUserType;
+            isOtpRoute ||
+            isUserType;
 
         if (!loggedIn && !isPublicRoute) {
           return '/login';
@@ -79,30 +82,55 @@ class AblePlusApp extends ConsumerWidget {
         return null;
       },
       routes: [
-GoRoute(
-  path: '/login',
-  builder: (context, state) => const LoginScreen(),
-  ),
-  GoRoute(
-    path: '/user-type',
-    builder: (context, state) => const UserType(),
-    ),
-    GoRoute(
-      path: '/signup',
-      builder: (context, state) => const GeneralSignup(),
-      ),
-      GoRoute(path: '/businesses-signup',
-      builder: (context, state) => businessesSignup(),
-      ),
-      GoRoute(path: '/charity-signup',
-      builder: (context, state) => charitiesSignup(),),
-      GoRoute(path: '/tutor-signup',
-      builder: (context, state) => tutorsSignup(),)
+        GoRoute(
+          path: '/login',
+          builder: (context, state) => const LoginScreen(),
+        ),
+        GoRoute(
+          path: '/user-type',
+          builder: (context, state) => const UserType(),
+        ),
 
+        GoRoute(
+          path: '/signup',
+          builder: (context, state) {
+            final type = state.uri.queryParameters['type'] ?? 'user';
+            return GeneralSignup(selectedUserType: type);
+          },
+        ),
 
-
-
-      ]
+        GoRoute(
+          path: '/businesses-signup',
+          builder: (context, state) => businessesSignup(),
+        ),
+        GoRoute(
+          path: '/charity-signup',
+          builder: (context, state) => charitiesSignup(),
+        ),
+        GoRoute(
+          path: '/tutor-signup',
+          builder: (context, state) => tutorsSignup(),
+        ),
+        GoRoute(
+          path: '/forget-password',
+          builder: (context, state) => ForgotPasswordEmailPage(),
+          
+          ),
+          GoRoute(
+            path: '/otp',
+            builder: (context, state) {
+              final email = state.uri.queryParameters['email'] ?? '';
+            return OtpVerificationPage(email: email);
+            },
+            ),
+            GoRoute(
+              path: '/reset-password',
+              builder: (context, state) {
+                 final email = state.uri.queryParameters['email'] ?? '';
+                 return Resetpasswordpage(email: email);
+              },
+              )
+      ],
     );
   }
 }
