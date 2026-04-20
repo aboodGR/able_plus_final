@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:ableplusproject/theme/App_theme.dart';
 
 class OtpVerificationPage extends StatefulWidget {
   final String email;
@@ -18,6 +19,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
   bool _isLoading = false;
   bool _isResending = false;
 
+  @override
   void dispose() {
     _otpController.dispose();
     super.dispose();
@@ -34,19 +36,21 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
       ).showSnackBar(const SnackBar(content: Text('Please enter the OTP')));
       return;
     }
+
     if (otp.length != 6) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('OTP must be 6 digits')));
       return;
     }
+
     setState(() => _isLoading = true);
 
     try {
       final response = await supabase.auth.verifyOTP(
         email: widget.email.toLowerCase(),
         token: otp,
-        type: OtpType.email,
+        type: OtpType.recovery,
       );
 
       if (!mounted) return;
@@ -57,34 +61,36 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
         ).showSnackBar(const SnackBar(content: Text('Invalid or expired OTP')));
         return;
       }
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('OTP verified successfully')),
       );
 
-     // context.push('/reset-password?email=${widget.email}');
-     context.push('/reset-password');
-    } on AuthApiException catch (e) {
+      context.go('/reset-password?email=${Uri.encodeComponent(widget.email)}');
+    } on AuthException catch (e) {
       if (!mounted) return;
 
       final error = e.message.toLowerCase();
       String message = e.message;
 
-      if (error.contains('token has expored') ||
+      if (error.contains('token has expired') ||
           error.contains('otp expired') ||
           error.contains('expired')) {
         message = 'The OTP has expired. Please request a new one.';
       } else if (error.contains('invalid') ||
           error.contains('token not found')) {
-        message = 'The OTP is invaild. Please check the code and try again.';
+        message = 'The OTP is invalid. Please check the code and try again.';
       }
+
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(message)));
     } catch (e) {
       if (!mounted) return;
+
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Faild to verify OTP: $e')));
+      ).showSnackBar(SnackBar(content: Text('Failed to verify OTP: $e')));
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -94,16 +100,27 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
 
   Future<void> _resendOtp() async {
     setState(() => _isResending = true);
+
     try {
-      await supabase.auth.signInWithOtp(
-        email: widget.email.toLowerCase(),
-        shouldCreateUser: false,
-      );
+      await supabase.auth.resetPasswordForEmail(widget.email.toLowerCase());
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('OTP resent successfully')));
     } on AuthException catch (e) {
       if (!mounted) return;
+
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(e.message)));
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to resend OTP: $e')));
     } finally {
       if (mounted) {
         setState(() => _isResending = false);
@@ -111,92 +128,215 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
     }
   }
 
+  @override
   Widget build(BuildContext context) {
-    final mutedColor = Colors.grey.shade600;
-    final accentColor = Theme.of(context).colorScheme.primary;
+    final isDark = AbleTheme.isDark(context);
+    final textPrimary = AbleTheme.textPrimary(context);
+    final textMuted = AbleTheme.textMuted(context);
+    final accent = AbleTheme.accent(context);
+    final primary = AbleTheme.primary(context);
+    final glassCard = AbleTheme.glassCard(context);
+    final glassBorder = AbleTheme.glassBorder(context);
+    final panelFill = AbleTheme.panelFill(context);
+    final iconBubble = AbleTheme.iconBubble(context);
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(title: const Text('Verify OTP'), centerTitle: true),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(Icons.verified_user_outlined, size: 72, color: accentColor),
-              const SizedBox(height: 24),
-              const Text(
-                'Enter Verification code',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'We sent a 6-digit code to ${widget.email}',
-                style: TextStyle(fontSize: 15, color: mutedColor, height: 1.5),
-              ),
-              const SizedBox(height: 32),
-              TextField(
-                controller: _otpController,
-                keyboardType: TextInputType.number,
-                maxLength: 6,
-                decoration: InputDecoration(
-                  labelText: 'OTP Code',
-                  hintText: 'Enter 6-digit code',
-                  counterText: '',
-                  prefixIcon: Icon(Icons.password_outlined),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              AbleTheme.backgroundAsset(context),
+              fit: BoxFit.cover,
+            ),
+          ),
+          Positioned.fill(
+            child: Container(color: AbleTheme.screenOverlay(context)),
+          ),
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 24,
                 ),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 54,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _verifyOtp,
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadiusGeometry.circular(14),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 470),
+                  child: Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: glassCard,
+                      borderRadius: BorderRadius.circular(30),
+                      border: Border.all(color: glassBorder),
+                      boxShadow: [
+                        BoxShadow(
+                          color: isDark
+                              ? Colors.black.withOpacity(0.30)
+                              : const Color(0x220AC4E0),
+                          blurRadius: 30,
+                          offset: const Offset(0, 14),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Center(
+                          child: Container(
+                            width: 88,
+                            height: 88,
+                            decoration: BoxDecoration(
+                              color: iconBubble,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: glassBorder),
+                            ),
+                            child: Icon(
+                              Icons.verified_user_outlined,
+                              size: 40,
+                              color: primary,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Center(
+                          child: Text(
+                            'Enter verification code',
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.headlineSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: textPrimary,
+                                ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Center(
+                          child: Text(
+                            'We sent a 6-digit code to\n${widget.email}',
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: textMuted, height: 1.6),
+                          ),
+                        ),
+                        const SizedBox(height: 28),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: panelFill,
+                            borderRadius: BorderRadius.circular(22),
+                            border: Border.all(color: glassBorder),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'OTP Code',
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: textPrimary,
+                                    ),
+                              ),
+                              const SizedBox(height: 10),
+                              TextField(
+                                controller: _otpController,
+                                keyboardType: TextInputType.number,
+                                maxLength: 6,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  letterSpacing: 8,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                  color: textPrimary,
+                                ),
+                                decoration: const InputDecoration(
+                                  hintText: '------',
+                                  counterText: '',
+                                  prefixIcon: Icon(Icons.password_outlined),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 56,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              gradient: AbleTheme.actionGradient(context),
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            child: ElevatedButton(
+                              onPressed: _isLoading ? null : _verifyOtp,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                foregroundColor: Colors.white,
+                                shadowColor: Colors.transparent,
+                                disabledBackgroundColor: Colors.transparent,
+                                disabledForegroundColor: Colors.white70,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(24),
+                                ),
+                              ),
+                              child: _isLoading
+                                  ? const SizedBox(
+                                      width: 22,
+                                      height: 22,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.3,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : const Text(
+                                      'Verify OTP',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Center(
+                          child: TextButton(
+                            onPressed: _isResending ? null : _resendOtp,
+                            child: _isResending
+                                ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Text(
+                                    'Resend OTP',
+                                    style: TextStyle(
+                                      color: accent,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Center(
+                          child: TextButton(
+                            onPressed: _isLoading
+                                ? null
+                                : () => context.go('/forgot-password'),
+                            child: const Text('Back'),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(
-                          'Verifiy OTP',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
                 ),
               ),
-              const SizedBox(height: 12),
-              Center(
-                child: TextButton(
-                  onPressed: _isResending ? null : _resendOtp,
-                  child: _isResending
-                      ? SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(
-                          'Resend OTP',
-                          style: TextStyle(
-                            color: accentColor,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

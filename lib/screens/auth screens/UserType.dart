@@ -98,7 +98,7 @@ class _UserTypeState extends State<UserType> {
                             Center(
                               child: Image.asset(
                                 AbleTheme.logoAsset,
-                                fit: BoxFit.contain
+                                fit: BoxFit.contain,
                               ),
                             ),
                             const SizedBox(height: 12),
@@ -126,7 +126,7 @@ class _UserTypeState extends State<UserType> {
                             const SizedBox(height: 20),
                             GridView.builder(
                               shrinkWrap: true,
-                              itemCount: UserType.accountTypes.length,  
+                              itemCount: UserType.accountTypes.length,
                               physics: const NeverScrollableScrollPhysics(),
                               gridDelegate:
                                   const SliverGridDelegateWithFixedCrossAxisCount(
@@ -143,7 +143,7 @@ class _UserTypeState extends State<UserType> {
                             const SizedBox(height: 18),
                             Center(
                               child: TextButton(
-                              onPressed: () => context.go('/login'),
+                                onPressed: () => context.go('/login'),
                                 child: const Text('Back to Login'),
                               ),
                             ),

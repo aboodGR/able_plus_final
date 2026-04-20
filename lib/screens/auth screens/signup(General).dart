@@ -28,81 +28,76 @@ class _GeneralSignupState extends State<GeneralSignup> {
   bool obscureConfirmPassword = true;
   bool isloading = false;
 
-  Future<void> _handleContinue(BuildContext context) async {
-    FocusScope.of(context).unfocus();
+Future<void> _handleContinue(BuildContext context) async {
+  FocusScope.of(context).unfocus();
 
-    if (!_formkey.currentState!.validate()) return;
+  if (!_formkey.currentState!.validate()) return;
 
-    final fullName = fullNameController.text.trim();
-    final username = usernameController.text.trim();
-    final email = emailController.text.trim().toLowerCase();
-    final password = passwordController.text;
-    final userType = widget.selectedUserType.trim();
+  final fullName = fullNameController.text.trim();
+  final username = usernameController.text.trim();
+  final email = emailController.text.trim().toLowerCase();
+  final password = passwordController.text;
+  final userType = widget.selectedUserType.trim();
 
-    setState(() => isloading = true);
+  final signupPayload = {
+    'full_name': fullName,
+    'username': username,
+    'email': email,
+    'password': password,
+  };
 
-    try {
+  setState(() => isloading = true);
+
+  try {
+    if (userType == 'user') {
+      // ✅ ONLY normal users sign up here
       final response = await supabase.auth.signUp(
         email: email,
         password: password,
-        data: {'full_name': fullName, 'username': username},
+        data: {
+          'full_name': fullName,
+          'username': username,
+        },
       );
 
       if (!mounted) return;
 
-      final user = response.user;
-
-      if (user == null) {
+      if (response.user == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not create account. Please try again'),
-          ),
+          const SnackBar(content: Text('Signup failed')),
         );
         return;
       }
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-            'Account created successfully. Please verify your email before logging in.',
-          ),
+          content: Text('Account created. Please verify your email.'),
         ),
       );
-      if (userType == 'user') {
-        context.go('/login');
-      } else if (userType == 'charities') {
-        context.go('/charity-signup');
-      } else if (userType == 'tutor') {
-        context.go('/tutor-signup');
-      } else if (userType == 'businesses') {
-        context.go('/businesses-signup');
-      }
-    } on AuthException catch (e) {
-      if (!mounted) return;
 
-      final error = e.message.toLowerCase();
-      String message = e.message;
-
-      if (error.contains('user already registered')) {
-        message = 'This email is already registered. Please log in instead.';
-      } else if (error.contains('rate limit')) {
-        message =
-            'Too many email requests. Please wait a minute and try again.';
-      }
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(message)));
-    } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Something went wrong: $e')));
-    } finally {
-      if (mounted) {
-        setState(() => isloading = false);
+      context.go('/login');
+    } else {
+      // ✅ service providers go to verification pages
+      if (userType == 'tutor') {
+        context.go('/tutor-signup', extra: signupPayload);
+      } else if (userType == 'business') {
+        context.go('/businesses-signup', extra: signupPayload);
+      } else if (userType == 'charity') {
+        context.go('/charity-signup', extra: signupPayload);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Unknown user type: $userType')),
+        );
       }
     }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error: $e')),
+    );
+  } finally {
+    if (mounted) setState(() => isloading = false);
   }
+}
 
   String? _validateFullName(String? value) {
     final text = value?.trim() ?? '';
@@ -243,11 +238,7 @@ class _GeneralSignupState extends State<GeneralSignup> {
                     child: Column(
                       children: [
                         const SizedBox(height: 8),
-                        Image.asset(
-                          AbleTheme.logoAsset,
-                         
-                          fit: BoxFit.contain,
-                        ),
+                        Image.asset(AbleTheme.logoAsset, fit: BoxFit.contain),
                         const SizedBox(height: 18),
                         ClipRRect(
                           borderRadius: BorderRadius.circular(32),
@@ -450,7 +441,7 @@ class _GeneralSignupState extends State<GeneralSignup> {
                                   const SizedBox(height: 14),
                                   Center(
                                     child: GestureDetector(
-                                      onTap: () => context..push('/login'),
+                                      onTap: () => context.push('/login'),
                                       child: Text.rich(
                                         TextSpan(
                                           text: 'Already have an account? ',
