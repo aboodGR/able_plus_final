@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:ableplusproject/screens/Home/homePage.dart';
+import 'package:ableplusproject/screens/Settings/settings.dart';
 import 'package:ableplusproject/screens/auth%20screens/LoginScreen.dart';
 import 'package:ableplusproject/screens/auth%20screens/OTP%20things/ForgotPasswordEmailPage.dart';
 import 'package:ableplusproject/screens/auth%20screens/OTP%20things/OtpVerificationPage.dart';
@@ -10,10 +12,13 @@ import 'package:ableplusproject/screens/auth%20screens/signup(businesses).dart';
 import 'package:ableplusproject/screens/auth%20screens/signup(charities).dart';
 import 'package:ableplusproject/screens/auth%20screens/signup(tutor).dart';
 import 'package:ableplusproject/providers/theme_providers.dart';
+import 'package:ableplusproject/screens/profile/profile.dart';
 import 'package:ableplusproject/theme/App_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ableplusproject/screens/Post/CreatePost.dart';
+import 'package:ableplusproject/screens/Settings/settings.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
@@ -71,6 +76,7 @@ class _AblePlusAppState extends ConsumerState<AblePlusApp> {
         final location = state.matchedLocation;
 
         final isLoginRoute = location == '/login';
+        final isHomeRoute = location == '/home';
         final isUserTypeRoute = location == '/user-type';
         final isForgotPasswordRoute = location == '/forgot-password';
         final isOtpRoute = location == '/otp';
@@ -78,6 +84,9 @@ class _AblePlusAppState extends ConsumerState<AblePlusApp> {
         final isTutorSignupRoute = location == '/tutor-signup';
         final isCharitySignupRoute = location == '/charity-signup';
         final isBusinessSignupRoute = location == '/businesses-signup';
+        final isProfilreRoute = location == '/profile';
+        final isSettings = location == '/settings';
+        final isCreatePostRout = location =='/CreatePost';
 
         final isSignupRoute =
             location == '/signup' ||
@@ -97,7 +106,11 @@ class _AblePlusAppState extends ConsumerState<AblePlusApp> {
             isSignupRoute ||
             isTutorSignupRoute ||
             isCharitySignupRoute ||
-            isBusinessSignupRoute;
+            isBusinessSignupRoute|| 
+            isProfilreRoute|| 
+            isHomeRoute||
+            isSettings||
+            isCreatePostRout;
 
         if (!loggedIn && !isPublicRoute) {
   return '/login';
@@ -160,7 +173,43 @@ class _AblePlusAppState extends ConsumerState<AblePlusApp> {
             return ResetPasswordScreen(email: email);
           },
         ),
-
+         GoRoute(
+          path: '/profile',
+          builder: (context, state) => const ProfileScreen(
+            currentUserProfile: true,
+          ),
+        ),
+        GoRoute(
+          path: '/profile/:role/:id',
+          builder: (context, state) => ProfileScreen(
+            role: state.pathParameters['role'],
+            userId: state.pathParameters['id'],
+          ),
+        ),
+        GoRoute(
+          path: '/home/profile/currentUser',
+          redirect: (context, state) => '/profile',
+        ),
+        GoRoute(
+          path: '/home/profile/:role/:id',
+          redirect: (context, state) {
+            final role = state.pathParameters['role'];
+            final id = state.pathParameters['id'];
+            return '/profile/$role/$id';
+          },
+        ),
+        GoRoute(
+          path: '/home',
+          builder: (context, state) => const HomeScreen(),
+        ),
+       GoRoute(
+  path: '/home/settings',
+  builder: (context, state) => const SettingsScreen(),
+),
+GoRoute(
+              path: '/home/create-post',
+              builder: (_, __) => const CreatePostScreen(),
+            ),
       ],
     );
   }

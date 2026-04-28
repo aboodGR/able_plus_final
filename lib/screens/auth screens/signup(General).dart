@@ -50,46 +50,43 @@ Future<void> _handleContinue(BuildContext context) async {
 
   try {
     if (userType == 'user') {
-      // ✅ ONLY normal users sign up here
-      final response = await supabase.auth.signUp(
-        email: email,
-        password: password,
-        data: {
-          'full_name': fullName,
-          'username': username,
-        },
-      );
+  final response = await supabase.auth.signUp(
+    email: email,
+    password: password,
+    data: {
+      'full_name': fullName,
+      'username': username,
+      'role': 'client',
+    },
+  );
 
-      if (!mounted) return;
+  if (!mounted) return;
 
-      if (response.user == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Signup failed')),
-        );
-        return;
-      }
+  if (response.user == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Signup failed')),
+    );
+    return;
+  }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Account created. Please verify your email.'),
-        ),
-      );
+  final clientId = response.user!.id;
 
-      context.go('/login');
-    } else {
-      // ✅ service providers go to verification pages
-      if (userType == 'tutor') {
-        context.go('/tutor-signup', extra: signupPayload);
-      } else if (userType == 'business') {
-        context.go('/businesses-signup', extra: signupPayload);
-      } else if (userType == 'charity') {
-        context.go('/charity-signup', extra: signupPayload);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Unknown user type: $userType')),
-        );
-      }
-    }
+  await supabase.from('clients').insert({
+    'id': clientId,
+    'full_name': fullName,
+    'username': username,
+    'email': email,
+    'password': password,
+  });
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(
+      content: Text('Account created. Please verify your email.'),
+    ),
+  );
+
+  context.push('/login');
+}
   } catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Error: $e')),

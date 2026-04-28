@@ -184,6 +184,7 @@ class _CharitiesSignupState extends State<CharitiesSignup> {
         'full_name': fullName,
         'username': username,
         'email': email,
+        'password': password,
         'charity_name': charityName,
         'location': location,
       });

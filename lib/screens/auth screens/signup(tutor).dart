@@ -65,19 +65,16 @@ class _tutorsSignupState extends State<tutorsSignup> {
     required Uint8List bytes,
     required String fileName,
     required String folder,
+    required String userId,
   }) async {
-    final user = supabase.auth.currentUser;
-    if (user == null) {
-      throw Exception('No authenticated user found.');
-    }
-
     final ext = fileName.contains('.') ? fileName.split('.').last : 'bin';
-    final path =
-        '$folder/${user.id}/${DateTime.now().millisecondsSinceEpoch}_$fileName';
 
-    await supabase.storage
-        .from(_storageBucket)
-        .uploadBinary(
+    final safeFileName = fileName.replaceAll(' ', '_');
+
+    final path =
+        '$folder/$userId/${DateTime.now().millisecondsSinceEpoch}_$safeFileName';
+
+    await supabase.storage.from(_storageBucket).uploadBinary(
           path,
           bytes,
           fileOptions: FileOptions(
@@ -116,40 +113,23 @@ class _tutorsSignupState extends State<tutorsSignup> {
       _showSnackBar('Please upload your certificate proof.');
       return;
     }
+
     if (_cvBytes == null) {
       _showSnackBar('Please upload your CV or specialization file.');
       return;
     }
+
     if (_idImageBytes == null) {
       _showSnackBar('Please upload your ID image.');
-      return;
-    }
-
-    final currentUser = supabase.auth.currentUser;
-    if (currentUser == null) {
-      _showSnackBar('Your session was not found. Please sign up again.');
       return;
     }
 
     final routeExtra = GoRouterState.of(context).extra;
     final signupData = routeExtra is Map<String, dynamic> ? routeExtra : null;
 
-    final fullName =
-        (signupData?['full_name'] ??
-                currentUser.userMetadata?['full_name'] ??
-                '')
-            .toString()
-            .trim();
-
-    final username =
-        (signupData?['username'] ?? currentUser.userMetadata?['username'] ?? '')
-            .toString()
-            .trim();
-
-    final email = (signupData?['email'] ?? currentUser.email ?? '')
-        .toString()
-        .trim();
-
+    final fullName = (signupData?['full_name'] ?? '').toString().trim();
+    final username = (signupData?['username'] ?? '').toString().trim();
+    final email = (signupData?['email'] ?? '').toString().trim();
     final password = (signupData?['password'] ?? '').toString();
 
     if (fullName.isEmpty || username.isEmpty || email.isEmpty) {
@@ -161,70 +141,58 @@ class _tutorsSignupState extends State<tutorsSignup> {
 
     if (password.isEmpty) {
       _showSnackBar(
-        'Password is missing for tutor table insert. Pass it from the general signup page.',
+        'Password is missing. Please go back and complete signup again.',
       );
       return;
     }
-    await supabase.auth.signUp(
-      email: email,
-      password: password,
-      data: {'full_name': fullName, 'username': username},
-    );
 
     setState(() => _isSubmitting = true);
 
     try {
+      final authResponse = await supabase.auth.signUp(
+        email: email,
+        password: password,
+        data: {
+          'full_name': fullName,
+          'username': username,
+          'role': 'tutor',
+        },
+      );
+
+      final tutorId = authResponse.user?.id;
+
+      if (tutorId == null) {
+        throw Exception('Tutor auth account was not created.');
+      }
+
+      await supabase.from('tutors').insert({
+        'id': tutorId,
+        'full_name': fullName,
+        'username': username,
+        'email': email,
+        'password': password,
+      });
+
       final certificateUrl = await _uploadFile(
         bytes: _certificateBytes!,
         fileName: _certificateName!,
         folder: 'tutors/certificate_prove',
+        userId: tutorId,
       );
 
       final cvUrl = await _uploadFile(
         bytes: _cvBytes!,
         fileName: _cvName!,
         folder: 'tutors/cv',
+        userId: tutorId,
       );
 
       final idImageUrl = await _uploadFile(
         bytes: _idImageBytes!,
         fileName: _idImageName!,
         folder: 'tutors/id_img',
+        userId: tutorId,
       );
-
-      String tutorId;
-
-      final existingTutor = await supabase
-          .from('tutors')
-          .select('id')
-          .eq('email', email)
-          .maybeSingle();
-
-      if (existingTutor != null && existingTutor['id'] != null) {
-        tutorId = existingTutor['id'] as String;
-
-        await supabase
-            .from('tutors')
-            .update({
-              'full_name': fullName,
-              'username': username,
-              'password': password,
-            })
-            .eq('id', tutorId);
-      } else {
-        final insertedTutor = await supabase
-            .from('tutors')
-            .insert({
-              'full_name': fullName,
-              'username': username,
-              'email': email,
-              'password': password,
-            })
-            .select('id')
-            .single();
-
-        tutorId = insertedTutor['id'] as String;
-      }
 
       await supabase.from('media').insert([
         {
@@ -250,6 +218,11 @@ class _tutorsSignupState extends State<tutorsSignup> {
         },
       ]);
 
+      await supabase.from('admin_requests').insert({
+        'request_type': 'tutor_verification',
+        'tutor_id': tutorId,
+      });
+
       if (!mounted) return;
 
       _showSnackBar('Tutor account submitted successfully for verification.');
@@ -265,9 +238,9 @@ class _tutorsSignupState extends State<tutorsSignup> {
 
   void _showSnackBar(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   @override
@@ -384,9 +357,8 @@ class _tutorsSignupState extends State<tutorsSignup> {
                                 _UploadTile(
                                   icon: Icons.verified_outlined,
                                   title: 'Upload certificate proof',
-                                  subtitle:
-                                      _certificateName ??
-                                      'PDF , Image or Document',
+                                  subtitle: _certificateName ??
+                                      'PDF, Image or Document',
                                   accentColor: accentColor,
                                   cardColor: softCardColor,
                                   onTap: () => _pickFile(
@@ -398,110 +370,97 @@ class _tutorsSignupState extends State<tutorsSignup> {
                                   ),
                                 ),
                                 const SizedBox(height: 14),
-                                  _UploadTile(
-                                    icon: Icons.description_outlined,
-                                    title: 'Upload CV / specialization',
-                                    subtitle:
-                                        _cvName ?? 'PDF, image, or document',
-                                    accentColor: accentColor,
-                                    cardColor: softCardColor,
-                                    onTap: () => _pickFile(
-                                      imagesOnly: false,
-                                      onPicked: (bytes, name) {
-                                        _cvBytes = bytes;
-                                        _cvName = name;
-                                      },
-                                    ),
+                                _UploadTile(
+                                  icon: Icons.description_outlined,
+                                  title: 'Upload CV / specialization',
+                                  subtitle:
+                                      _cvName ?? 'PDF, image, or document',
+                                  accentColor: accentColor,
+                                  cardColor: softCardColor,
+                                  onTap: () => _pickFile(
+                                    imagesOnly: false,
+                                    onPicked: (bytes, name) {
+                                      _cvBytes = bytes;
+                                      _cvName = name;
+                                    },
                                   ),
-                                  const SizedBox(height: 14),
-                                  _UploadTile(
-                                    icon: Icons.badge_outlined,
-                                    title: 'Upload ID image',
-                                    subtitle:
-                                        _idImageName ?? 'JPG, JPEG, or PNG',
-                                    accentColor: accentColor,
-                                    cardColor: softCardColor,
-                                    onTap: () => _pickFile(
-                                      imagesOnly: true,
-                                      onPicked: (bytes, name) {
-                                        _idImageBytes = bytes;
-                                        _idImageName = name;
-                                      },
-                                    ),
+                                ),
+                                const SizedBox(height: 14),
+                                _UploadTile(
+                                  icon: Icons.badge_outlined,
+                                  title: 'Upload ID image',
+                                  subtitle: _idImageName ?? 'JPG, JPEG, or PNG',
+                                  accentColor: accentColor,
+                                  cardColor: softCardColor,
+                                  onTap: () => _pickFile(
+                                    imagesOnly: true,
+                                    onPicked: (bytes, name) {
+                                      _idImageBytes = bytes;
+                                      _idImageName = name;
+                                    },
                                   ),
-                                  const SizedBox(height: 24),
-                                  Text(
-                                    'These documents are required to verify your tutor account.',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: mutedColor,
-                                      height: 1.5,
-                                    ),
+                                ),
+                                const SizedBox(height: 24),
+                                Text(
+                                  'These documents are required to verify your tutor account.',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: mutedColor,
+                                    height: 1.5,
                                   ),
-                                  const SizedBox(height: 22),
-                                  Container(
-                                    width: double.infinity,
-                                    height: 58,
-                                    decoration: BoxDecoration(
-                                      gradient: buttonGradient,
-                                      borderRadius: BorderRadius.circular(30),
-                                      boxShadow: [
-                                        if (isDark)
-                                          BoxShadow(
-                                            color: const Color(
-                                              0xFF0B82D2,
-                                            ).withOpacity(0.22),
-                                            blurRadius: 18,
-                                            offset: const Offset(0, 8),
-                                          ),
-                                      ],
-                                    ),
-                                    child: ElevatedButton(
-                                      onPressed: _isSubmitting
-                                          ? null
-                                          : _submitTutorSignup,
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.transparent,
-                                        shadowColor: Colors.transparent,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            30,
-                                          ),
-                                        ),
+                                ),
+                                const SizedBox(height: 22),
+                                Container(
+                                  width: double.infinity,
+                                  height: 58,
+                                  decoration: BoxDecoration(
+                                    gradient: buttonGradient,
+                                    borderRadius: BorderRadius.circular(30),
+                                  ),
+                                  child: ElevatedButton(
+                                    onPressed: _isSubmitting
+                                        ? null
+                                        : _submitTutorSignup,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.transparent,
+                                      shadowColor: Colors.transparent,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(30),
                                       ),
-                                      child: _isSubmitting
-                                          ? const SizedBox(
-                                              width: 22,
-                                              height: 22,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2.5,
-                                              ),
-                                            )
-                                          : const Text(
-                                              'Submit for Approval',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w700,
-                                              ),
+                                    ),
+                                    child: _isSubmitting
+                                        ? const SizedBox(
+                                            width: 22,
+                                            height: 22,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2.5,
                                             ),
+                                          )
+                                        : const Text(
+                                            'Submit for Approval',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                  ),
+                                ),
+                                const SizedBox(height: 18),
+                                Text(
+                                  'Already have an account?',
+                                  style: TextStyle(color: mutedColor),
+                                ),
+                                const SizedBox(height: 4),
+                                TextButton(
+                                  onPressed: () => context.go('/login'),
+                                  child: Text(
+                                    'Log in',
+                                    style: TextStyle(
+                                      color: accentColor,
+                                      fontWeight: FontWeight.w700,
                                     ),
                                   ),
-                                  const SizedBox(height: 18),
-                                  Text(
-                                    'Already have an account?',
-                                    style: TextStyle(color: mutedColor),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  TextButton(
-                                    onPressed: () => context.go('/login'),
-                                    child: Text(
-                                      'Log in',
-                                      style: TextStyle(
-                                        color: accentColor,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ),
+                                ),
                               ],
                             ),
                           ),
