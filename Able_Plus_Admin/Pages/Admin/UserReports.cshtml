@@ -1,0 +1,31 @@
+@page
+@model AblePlusAdmin.Pages.Admin.UserReportsModel
+
+<h1>User Reports</h1>
+
+<table border="1" cellpadding="8">
+    <tr>
+        <th>Reported User</th>
+        <th>Reported By</th>
+        <th>Message</th>
+        <th>Date</th>
+        <th>Actions</th>
+    </tr>
+
+    @foreach (var report in Model.Reports)
+    {
+        <tr>
+            <td>@Model.GetUserInfo(report.ReportedUserId)</td>
+            <td>@Model.GetUserInfo(report.ReportedBy)</td>
+            <td>@report.Message</td>
+            <td>@report.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+            <td>
+                <form method="post" asp-page-handler="Dismiss"
+                      onsubmit="return confirm('Dismiss this report?');">
+                    <input type="hidden" name="reportId" value="@report.Id" />
+                    <button type="submit">Dismiss</button>
+                </form>
+            </td>
+        </tr>
+    }
+</table>

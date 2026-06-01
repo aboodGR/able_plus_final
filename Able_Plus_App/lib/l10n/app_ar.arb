@@ -1,0 +1,236 @@
+{
+  "@@locale": "ar",
+  "appName": "Able+",
+  "settings": "الإعدادات",
+  "darkMode": "الوضع الداكن",
+  "language": "اللغة",
+  "textToSpeech": "تحويل النص إلى كلام",
+  "colorBlindMode": "وضع عمى الألوان",
+  "colorBlindModeDesc": "يطبّق فلتر Deuteranopia للمساعدة في التمييز بين الألوان",
+  "privacySettings": "إعدادات الخصوصية",
+  "appearance": "المظهر",
+  "accessibility": "إمكانية الوصول",
+  "home": "الرئيسية",
+  "map": "الخريطة",
+  "messages": "الرسائل",
+  "profile": "الملف الشخصي",
+  "notifications": "الإشعارات",
+  "myActivity": "نشاطي",
+  "support": "الدعم",
+  "aboutUs": "من نحن",
+  "logOut": "تسجيل الخروج",
+  "logOutConfirm": "هل أنت متأكد أنك تريد تسجيل الخروج؟",
+  "cancel": "إلغاء",
+  "confirm": "تأكيد",
+  "recentActivity": "النشاط الأخير",
+  "recentActivityDesc": "ستظهر هنا إعجاباتك وتعليقاتك ومتابعاتك حتى تتمكن من المتابعة من حيث توقفت.",
+  "noActivityYet": "لا يوجد نشاط بعد",
+  "noCommentsYet": "لا يوجد تعليقات بعد",
+  "noLikesYet": "لا يوجد إعجابات بعد",
+  "noSavedYet": "لا يوجد منشورات محفوظة بعد",
+  "comments": "التعليقات",
+  "likes": "الإعجابات",
+  "saved": "المحفوظات",
+  "youLikedAPost": "أعجبك منشور",
+  "youCommentedOnAPost": "علّقت على منشور",
+  "youSavedAPost": "حفظت منشوراً",
+  "tapToViewPost": "اضغط لعرض المنشور",
+  "tapToOpenProfile": "اضغط لفتح الملف الشخصي",
+  "youFollowed": "قمت بمتابعة {name}",
+  "@youFollowed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "postNoLongerAvailable": "هذا المنشور لم يعد متاحاً.",
+  "profileNotAvailable": "الملف الشخصي غير متاح.",
+  "couldNotLoadActivity": "تعذّر تحميل نشاطك.",
+  "ourTeam": "فريقنا",
+  "founderCeo": "مؤسس والرئيس التنفيذي",
+  "email": "البريد الإلكتروني",
+  "phone": "الهاتف",
+  "couldNotOpenEmail": "تعذّر فتح تطبيق البريد الإلكتروني",
+  "couldNotOpenPhone": "تعذّر فتح تطبيق الهاتف",
+  "sendMessage": "إرسال رسالة",
+  "typeMessage": "اكتب رسالة...",
+  "noMessages": "لا توجد رسائل بعد",
+  "startConversation": "ابدأ محادثة",
+  "createPost": "إنشاء منشور",
+  "post": "نشر",
+  "title": "العنوان",
+  "description": "الوصف",
+  "addImage": "إضافة صورة",
+  "addVideo": "إضافة فيديو",
+  "search": "بحث",
+  "filter": "تصفية",
+  "noResults": "لا توجد نتائج",
+  "follow": "متابعة",
+  "unfollow": "إلغاء المتابعة",
+  "followers": "المتابعون",
+  "following": "يتابع",
+  "like": "إعجاب",
+  "comment": "تعليق",
+  "share": "مشاركة",
+  "save": "حفظ",
+  "businesses": "الأعمال",
+  "tutors": "المدرّسون",
+  "charities": "الجمعيات الخيرية",
+  "login": "تسجيل الدخول",
+  "signup": "إنشاء حساب",
+  "forgotPassword": "نسيت كلمة المرور؟",
+  "enterEmail": "أدخل بريدك الإلكتروني",
+  "enterPassword": "أدخل كلمة المرور",
+  "dontHaveAccount": "ليس لديك حساب؟",
+  "alreadyHaveAccount": "لديك حساب بالفعل؟",
+  "resetPassword": "إعادة تعيين كلمة المرور",
+  "sendOtp": "إرسال رمز التحقق",
+  "verifyOtp": "التحقق من الرمز",
+  "newPassword": "كلمة مرور جديدة",
+  "confirmPassword": "تأكيد كلمة المرور",
+  "error": "خطأ",
+  "retry": "إعادة المحاولة",
+  "loading": "جارٍ التحميل...",
+  "success": "تم بنجاح",
+  "somethingWentWrong": "حدث خطأ ما",
+  "justNow": "الآن",
+  "minutesAgo": "منذ {count} د",
+  "@minutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAgo": "منذ {count} س",
+  "@hoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "daysAgo": "منذ {count} أيام",
+  "@daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deuteranopiaFilter": "فلتر عمى الألوان",
+  "howColorsAppear": "كيف تظهر الألوان",
+  "normal": "طبيعي",
+  "withFilter": "مع الفلتر",
+
+  "noMessagesYet": "لا توجد رسائل بعد.",
+  "unknown": "غير معروف",
+  "deleteChat": "حذف المحادثة",
+  "youBothBlockedShort": "لقد حظر كل منكما الآخر",
+  "youBlockedThisUser": "لقد حظرت هذا المستخدم",
+  "thisUserBlockedYou": "قام هذا المستخدم بحظرك",
+  "messagesHidden": "الرسائل مخفية",
+  "timeNow": "الآن",
+  "minutesShort": "منذ {count} د",
+  "@minutesShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursShort": "منذ {count} س",
+  "@hoursShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "daysShort": "منذ {count} ي",
+  "@daysShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ableUser": "مستخدم Able",
+  "cannotBlockMissingInfo": "تعذّر الحظر: معلومات المستخدم ناقصة.",
+  "blockUserQuestion": "حظر المستخدم؟",
+  "blockUserBody": "سيظهر باسم مستخدم Able. ستُخفى الرسائل الجديدة حتى إلغاء الحظر.",
+  "block": "حظر",
+  "unblock": "إلغاء الحظر",
+  "userBlocked": "تم حظر المستخدم.",
+  "blockFailed": "فشل الحظر: {error}",
+  "@blockFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "userUnblocked": "تم إلغاء حظر المستخدم.",
+  "unblockFailed": "فشل إلغاء الحظر: {error}",
+  "@unblockFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "profileUnavailable": "الملف الشخصي غير متاح.",
+  "profileInfoMissing": "معلومات الملف الشخصي ناقصة.",
+  "edited": "مُعدّلة",
+  "sendingStatus": "جارٍ الإرسال...",
+  "seenStatus": "تمت المشاهدة",
+  "startTheConversation": "ابدأ المحادثة.",
+  "messageWillAppearAfterUnblock": "ستظهر الرسالة بعد إلغاء الحظر...",
+  "messageHintDefault": "رسالة...",
+  "messageWillAppearToThem": "ستظهر الرسالة لهم بعد إلغاء الحظر.",
+  "sendFailed": "فشل الإرسال: {error}",
+  "@sendFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "waitUntilSent": "انتظر حتى يتم إرسال الرسالة.",
+  "editMessage": "تعديل الرسالة",
+  "messageDialogHint": "رسالة...",
+  "messageUpdated": "تم تحديث الرسالة.",
+  "editFailed": "فشل التعديل: {error}",
+  "@editFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteMessageQuestion": "حذف الرسالة؟",
+  "deleteMessageBody": "هل أنت متأكد أنك تريد حذف هذه الرسالة؟",
+  "delete": "حذف",
+  "deleteMessageMenu": "حذف الرسالة",
+  "deleteForMe": "حذف لي فقط",
+  "deleteForEveryone": "حذف للجميع",
+  "messageDeleted": "تم حذف الرسالة.",
+  "deleteFailed": "فشل الحذف: {error}",
+  "@deleteFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "onlyEditOwnMessages": "يمكنك تعديل أو حذف رسائلك فقط.",
+  "loadingPost": "جارٍ تحميل المنشور...",
+  "postUnavailable": "المنشور غير متاح",
+  "sharedAPost": "شارك منشوراً",
+  "youBothBlocked": "لقد حظر كل منكما الآخر. الرسائل مخفية حتى إلغاء الحظر.",
+  "youBlockedAbleUser": "لقد حظرت هذا المستخدم. الرسائل الجديدة مخفية حتى إلغاء الحظر.",
+  "ableUserBlockedYou": "قام هذا المستخدم بحظرك. الرسائل الجديدة مخفية حتى إلغاء الحظر.",
+  "blockUserMenu": "حظر المستخدم",
+  "unblockUserMenu": "إلغاء حظر المستخدم"
+}

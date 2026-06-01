@@ -1,0 +1,65 @@
+@page
+@model AblePlusAdmin.Pages.Admin.PostReportsModel
+
+<h1>Post Reports</h1>
+
+<table border="1" cellpadding="8">
+    <tr>
+        <th>Post Content</th>
+        <th>Post Media</th>
+        <th>Posted By</th>
+        <th>Reported By</th>
+        <th>Report Message</th>
+        <th>Actions</th>
+    </tr>
+
+    @foreach (var report in Model.Reports)
+    {
+        var post = Model.GetPost(report.PostId);
+        var mediaFiles = Model.GetPostMedia(report.PostId);
+
+        <tr>
+            <td>@(post?.Content ?? "Post not found")</td>
+
+            <td>
+                @if (mediaFiles.Any())
+                {
+                    foreach (var file in mediaFiles)
+                    {
+                        <div>
+                            <a href="@file.FileUrl" target="_blank">View</a>
+                            |
+                            <a href="@file.FileUrl" download>Download</a>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <span>No media</span>
+                }
+            </td>
+
+            <td>@Model.GetPostOwnerUsername(post)</td>
+
+            <td>@Model.GetReporterUsername(report.ReportedBy)</td>
+
+            <td>@report.Message</td>
+
+            <td>
+                @if (post != null)
+                {
+                    <form method="post" asp-page-handler="DeletePost" onsubmit="return confirm('Delete this post?');">
+                        <input type="hidden" name="reportId" value="@report.Id" />
+                        <input type="hidden" name="postId" value="@post.Id" />
+                        <button type="submit">Delete Post</button>
+                    </form>
+                }
+
+                <form method="post" asp-page-handler="Dismiss" onsubmit="return confirm('Dismiss this report?');">
+                    <input type="hidden" name="reportId" value="@report.Id" />
+                    <button type="submit">Dismiss Report</button>
+                </form>
+            </td>
+        </tr>
+    }
+</table>

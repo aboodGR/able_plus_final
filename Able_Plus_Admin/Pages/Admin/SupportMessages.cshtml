@@ -1,0 +1,212 @@
+@page
+@model AblePlusAdmin.Pages.Admin.SupportMessagesModel
+@{
+    ViewData["Title"] = "Support Tickets";
+}
+
+<style>
+    .support-grid {
+        display: grid;
+        grid-template-columns: 360px 1fr;
+        gap: 18px;
+    }
+
+    .ticket-list {
+        max-height: 76vh;
+        overflow-y: auto;
+    }
+
+    .ticket-card {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        padding: 14px;
+        margin-bottom: 10px;
+        background: #fff;
+    }
+
+    .ticket-card:hover {
+        border-color: #86b7fe;
+        background: #f8fbff;
+    }
+
+    .ticket-card.active {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 2px rgba(13, 110, 253, .12);
+    }
+
+    .chat-box {
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        background: #fff;
+        padding: 18px;
+        min-height: 76vh;
+    }
+
+    .messages {
+        height: 46vh;
+        overflow-y: auto;
+        background: #f8f9fa;
+        border-radius: 14px;
+        padding: 14px;
+        margin-bottom: 16px;
+    }
+
+    .bubble {
+        max-width: 78%;
+        padding: 10px 12px;
+        border-radius: 14px;
+        margin-bottom: 12px;
+        white-space: pre-wrap;
+    }
+
+    .bubble-user {
+        margin-left: auto;
+        background: #0d6efd;
+        color: white;
+    }
+
+    .bubble-admin {
+        margin-right: auto;
+        background: white;
+        border: 1px solid #dee2e6;
+    }
+
+    .bubble-system {
+        margin-left: auto;
+        margin-right: auto;
+        background: #fff3cd;
+        border: 1px solid #ffe69c;
+        color: #664d03;
+        text-align: center;
+    }
+
+    .bubble-meta {
+        font-size: 12px;
+        opacity: .75;
+        margin-bottom: 4px;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1 class="mb-1">Support Tickets</h1>
+        <p class="text-muted mb-0">Real ticket conversation between users and admins.</p>
+    </div>
+
+    <div class="btn-group">
+        <a class="btn @(Model.StatusFilter == "active" ? "btn-primary" : "btn-outline-primary")" asp-page="/Admin/SupportMessages" asp-route-status="active">Active</a>
+        <a class="btn @(Model.StatusFilter == "closed" ? "btn-primary" : "btn-outline-primary")" asp-page="/Admin/SupportMessages" asp-route-status="closed">Closed</a>
+        <a class="btn @(Model.StatusFilter == "all" ? "btn-primary" : "btn-outline-primary")" asp-page="/Admin/SupportMessages" asp-route-status="all">All</a>
+    </div>
+</div>
+
+<div class="support-grid">
+    <div class="ticket-list">
+        @if (!Model.Tickets.Any())
+        {
+            <div class="alert alert-light border">No support tickets found.</div>
+        }
+        else
+        {
+            @foreach (var ticket in Model.Tickets)
+            {
+                var isActive = Model.SelectedTicket?.Id == ticket.Id;
+                <a class="ticket-card @(isActive ? "active" : "")"
+                   asp-page="/Admin/SupportMessages"
+                   asp-route-ticketId="@ticket.Id"
+                   asp-route-status="@Model.StatusFilter">
+                    <div class="d-flex justify-content-between align-items-start gap-2">
+                        <strong>@ticket.Title</strong>
+                        <span class="@Model.StatusBadgeClass(ticket.Status)">@ticket.Status</span>
+                    </div>
+                    <div class="small text-muted mt-2">@Model.GetUserInfo(ticket.UserId)</div>
+                    <div class="small text-muted">Priority: @ticket.Priority | Category: @ticket.Category</div>
+                    <div class="small text-muted">Last message: @ticket.LastMessageAt.ToLocalTime().ToString("g")</div>
+                </a>
+            }
+        }
+    </div>
+
+    <div class="chat-box">
+        @if (Model.SelectedTicket == null)
+        {
+            <div class="text-center text-muted mt-5">Select a ticket to open the conversation.</div>
+        }
+        else
+        {
+            <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                <div>
+                    <h3 class="mb-1">@Model.SelectedTicket.Title</h3>
+                    <div class="text-muted">@Model.GetUserInfo(Model.SelectedTicket.UserId)</div>
+                    <div class="mt-2">
+                        <span class="@Model.StatusBadgeClass(Model.SelectedTicket.Status)">@Model.SelectedTicket.Status</span>
+                        <span class="badge bg-light text-dark border">@Model.SelectedTicket.Priority</span>
+                        <span class="badge bg-light text-dark border">@Model.SelectedTicket.Category</span>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    @if (Model.SelectedTicket.Status == "closed")
+                    {
+                        <form method="post" asp-page-handler="Reopen">
+                            <input type="hidden" name="ticketId" value="@Model.SelectedTicket.Id" />
+                            <input type="hidden" name="status" value="@Model.StatusFilter" />
+                            <button type="submit" class="btn btn-outline-success">Reopen</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form method="post" asp-page-handler="Close">
+                            <input type="hidden" name="ticketId" value="@Model.SelectedTicket.Id" />
+                            <input type="hidden" name="status" value="@Model.StatusFilter" />
+                            <button type="submit" class="btn btn-outline-secondary" onclick="return confirm('Close this ticket?')">Close</button>
+                        </form>
+                    }
+
+                    <form method="post" asp-page-handler="Delete">
+                        <input type="hidden" name="ticketId" value="@Model.SelectedTicket.Id" />
+                        <input type="hidden" name="status" value="@Model.StatusFilter" />
+                        <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Delete this ticket and all messages?')">Delete</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="messages">
+                @foreach (var msg in Model.SelectedTicket.Messages)
+                {
+                    var bubbleClass = msg.SenderType == "user"
+                        ? "bubble bubble-user"
+                        : msg.SenderType == "system"
+                            ? "bubble bubble-system"
+                            : "bubble bubble-admin";
+
+                    <div class="@bubbleClass">
+                        <div class="bubble-meta">
+                            @(msg.SenderType == "user" ? "User" : msg.SenderType == "system" ? "System" : (msg.AdminName ?? "Admin"))
+                            • @msg.CreatedAt.ToLocalTime().ToString("g")
+                        </div>
+                        <div>@msg.Message</div>
+                    </div>
+                }
+            </div>
+
+            @if (Model.SelectedTicket.Status == "closed")
+            {
+                <div class="alert alert-secondary">This ticket is closed. Reopen it before replying.</div>
+            }
+            else
+            {
+                <form method="post" asp-page-handler="Reply">
+                    <input type="hidden" name="ticketId" value="@Model.SelectedTicket.Id" />
+                    <input type="hidden" name="status" value="@Model.StatusFilter" />
+                    <label class="form-label fw-bold">Admin reply</label>
+                    <textarea name="adminMessage" class="form-control" rows="4" placeholder="Type your reply..." required></textarea>
+                    <button type="submit" class="btn btn-primary mt-3">Send Reply</button>
+                </form>
+            }
+        }
+    </div>
+</div>

@@ -1,0 +1,236 @@
+{
+  "@@locale": "en",
+  "appName": "Able+",
+  "settings": "Settings",
+  "darkMode": "Dark Mode",
+  "language": "Language",
+  "textToSpeech": "Text to Speech",
+  "colorBlindMode": "Color Blind Mode",
+  "colorBlindModeDesc": "Applies a Deuteranopia filter to help distinguish colors",
+  "privacySettings": "Privacy Settings",
+  "appearance": "Appearance",
+  "accessibility": "Accessibility",
+  "home": "Home",
+  "map": "Map",
+  "messages": "Messages",
+  "profile": "Profile",
+  "notifications": "Notifications",
+  "myActivity": "My Activity",
+  "support": "Support",
+  "aboutUs": "About Us",
+  "logOut": "Log out",
+  "logOutConfirm": "Are you sure you want to log out?",
+  "cancel": "Cancel",
+  "confirm": "Confirm",
+  "recentActivity": "Recent activity",
+  "recentActivityDesc": "Your likes, comments and follows will show up here so you can pick up where you left off.",
+  "noActivityYet": "No activity yet",
+  "noCommentsYet": "No comments yet",
+  "noLikesYet": "No likes yet",
+  "noSavedYet": "No saved posts yet",
+  "comments": "Comments",
+  "likes": "Likes",
+  "saved": "Saved",
+  "youLikedAPost": "You liked a post",
+  "youCommentedOnAPost": "You commented on a post",
+  "youSavedAPost": "You saved a post",
+  "tapToViewPost": "Tap to view the post",
+  "tapToOpenProfile": "Tap to open profile",
+  "youFollowed": "You followed {name}",
+  "@youFollowed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "postNoLongerAvailable": "This post is no longer available.",
+  "profileNotAvailable": "Profile not available.",
+  "couldNotLoadActivity": "Could not load your activity.",
+  "ourTeam": "Our Team",
+  "founderCeo": "Founder & CEO",
+  "email": "Email",
+  "phone": "Phone",
+  "couldNotOpenEmail": "Could not open email app",
+  "couldNotOpenPhone": "Could not open phone app",
+  "sendMessage": "Send a message",
+  "typeMessage": "Type a message...",
+  "noMessages": "No messages yet",
+  "startConversation": "Start a conversation",
+  "createPost": "Create Post",
+  "post": "Post",
+  "title": "Title",
+  "description": "Description",
+  "addImage": "Add Image",
+  "addVideo": "Add Video",
+  "search": "Search",
+  "filter": "Filter",
+  "noResults": "No results found",
+  "follow": "Follow",
+  "unfollow": "Unfollow",
+  "followers": "Followers",
+  "following": "Following",
+  "like": "Like",
+  "comment": "Comment",
+  "share": "Share",
+  "save": "Save",
+  "businesses": "Businesses",
+  "tutors": "Tutors",
+  "charities": "Charities",
+  "login": "Login",
+  "signup": "Sign Up",
+  "forgotPassword": "Forgot Password",
+  "enterEmail": "Enter your email",
+  "enterPassword": "Enter your password",
+  "dontHaveAccount": "Don't have an account?",
+  "alreadyHaveAccount": "Already have an account?",
+  "resetPassword": "Reset Password",
+  "sendOtp": "Send OTP",
+  "verifyOtp": "Verify OTP",
+  "newPassword": "New Password",
+  "confirmPassword": "Confirm Password",
+  "error": "Error",
+  "retry": "Retry",
+  "loading": "Loading...",
+  "success": "Success",
+  "somethingWentWrong": "Something went wrong",
+  "justNow": "Just now",
+  "minutesAgo": "{count}m ago",
+  "@minutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAgo": "{count}h ago",
+  "@hoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "daysAgo": "{count}d ago",
+  "@daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deuteranopiaFilter": "Deuteranopia filter",
+  "howColorsAppear": "How colors appear",
+  "normal": "Normal",
+  "withFilter": "With filter",
+
+  "noMessagesYet": "No messages yet.",
+  "unknown": "Unknown",
+  "deleteChat": "Delete Chat",
+  "youBothBlockedShort": "You both blocked each other",
+  "youBlockedThisUser": "You blocked this user",
+  "thisUserBlockedYou": "This user blocked you",
+  "messagesHidden": "Messages hidden",
+  "timeNow": "now",
+  "minutesShort": "{count}m",
+  "@minutesShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursShort": "{count}h",
+  "@hoursShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "daysShort": "{count}d",
+  "@daysShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ableUser": "AbleUser",
+  "cannotBlockMissingInfo": "Cannot block: missing user info.",
+  "blockUserQuestion": "Block user?",
+  "blockUserBody": "They will appear as AbleUser. New messages will be hidden until unblock.",
+  "block": "Block",
+  "unblock": "Unblock",
+  "userBlocked": "User blocked.",
+  "blockFailed": "Block failed: {error}",
+  "@blockFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "userUnblocked": "User unblocked.",
+  "unblockFailed": "Unblock failed: {error}",
+  "@unblockFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "profileUnavailable": "Profile unavailable.",
+  "profileInfoMissing": "Profile info is missing.",
+  "edited": "Edited",
+  "sendingStatus": "Sending...",
+  "seenStatus": "Seen",
+  "startTheConversation": "Start the conversation.",
+  "messageWillAppearAfterUnblock": "Message will appear after unblock...",
+  "messageHintDefault": "Message...",
+  "messageWillAppearToThem": "Message will appear to them after unblock.",
+  "sendFailed": "Send failed: {error}",
+  "@sendFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "waitUntilSent": "Wait until the message is sent.",
+  "editMessage": "Edit message",
+  "messageDialogHint": "Message...",
+  "messageUpdated": "Message updated.",
+  "editFailed": "Edit failed: {error}",
+  "@editFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteMessageQuestion": "Delete message?",
+  "deleteMessageBody": "Are you sure you want to delete this message?",
+  "delete": "Delete",
+  "deleteMessageMenu": "Delete message",
+  "deleteForMe": "Delete for me",
+  "deleteForEveryone": "Delete for everyone",
+  "messageDeleted": "Message deleted.",
+  "deleteFailed": "Delete failed: {error}",
+  "@deleteFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "onlyEditOwnMessages": "You can only edit or delete your own messages.",
+  "loadingPost": "Loading post...",
+  "postUnavailable": "Post unavailable",
+  "sharedAPost": "Shared a post",
+  "youBothBlocked": "You both blocked each other. Messages are hidden until unblock.",
+  "youBlockedAbleUser": "You blocked this user. New messages are hidden until unblock.",
+  "ableUserBlockedYou": "This user blocked you. New messages are hidden until unblock.",
+  "blockUserMenu": "Block user",
+  "unblockUserMenu": "Unblock user"
+}

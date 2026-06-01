@@ -1,0 +1,88 @@
+@page
+@model AblePlusAdmin.Pages.Admin.SignupRequestsModel
+
+<h1>Signup Requests</h1>
+
+<table border="1" cellpadding="8">
+    <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Location</th>
+        <th>Files</th>
+        <th>Actions</th>
+    </tr>
+
+    @foreach (var req in Model.TutorRequests)
+    {
+        <tr>
+            <td>Tutor</td>
+            <td>@req.FullName</td>
+            <td>@req.Username</td>
+            <td>@req.Email</td>
+            <td>-</td>
+            <td>
+                <a href="@req.CertificateUrl" target="_blank">Certificate</a><br />
+                <a href="@req.CvUrl" target="_blank">CV</a><br />
+                <a href="@req.IdImgUrl" target="_blank">ID Image</a>
+            </td>
+            <td>
+                <form method="post">
+                    <input type="hidden" name="id" value="@req.Id" />
+                    <button type="submit" asp-page-handler="ApproveTutor">Approve</button>
+                    <button type="submit" asp-page-handler="DeclineTutor">Decline</button>
+                </form>
+            </td>
+        </tr>
+    }
+
+    @foreach (var req in Model.BusinessRequests)
+    {
+        <tr>
+            <td>Business</td>
+            <td>@req.FullName</td>
+            <td>@req.Username</td>
+            <td>@req.Email</td>
+            <td>@req.Location</td>
+            <td>
+                @foreach (var imageUrl in AblePlusAdmin.Pages.Admin.SignupRequestsModel.SplitUrls(req.BusinessImgsUrl))
+                {
+                    <a href="@imageUrl" target="_blank">Business Image</a><br />
+                }
+                <a href="@req.CommercialRegisterUrl" target="_blank">Commercial Register</a><br />
+                <a href="@req.IdImgUrl" target="_blank">ID Image</a>
+            </td>
+            <td>
+                <form method="post">
+                    <input type="hidden" name="id" value="@req.Id" />
+                    <button type="submit" asp-page-handler="ApproveBusiness">Approve</button>
+                    <button type="submit" asp-page-handler="DeclineBusiness">Decline</button>
+                </form>
+            </td>
+        </tr>
+    }
+
+    @foreach (var req in Model.CharityRequests)
+    {
+        <tr>
+            <td>Charity</td>
+            <td>@req.FullName</td>
+            <td>@req.Username</td>
+            <td>@req.Email</td>
+            <td>@req.Location</td>
+            <td>
+                <strong>Charity Name:</strong> @req.CharityName<br />
+                <a href="@req.CharityProveUrl" target="_blank">Charity Proof</a><br />
+                <a href="@req.IdImgUrl" target="_blank">ID Image</a>
+            </td>
+            <td>
+                <form method="post">
+                    <input type="hidden" name="id" value="@req.Id" />
+                    <button type="submit" asp-page-handler="ApproveCharity">Approve</button>
+                    <button type="submit" asp-page-handler="DeclineCharity">Decline</button>
+                </form>
+            </td>
+        </tr>
+    }
+</table>

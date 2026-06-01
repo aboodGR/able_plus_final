@@ -1,0 +1,91 @@
+@page
+@model AblePlusAdmin.Pages.Admin.UsersModel
+
+<h1>All Users</h1>
+
+<table border="1" cellpadding="8">
+    <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Location</th>
+        <th>Actions</th>
+    </tr>
+
+    <!-- Clients -->
+    @foreach (var c in Model.Clients)
+    {
+        <tr>
+            <td>Client</td>
+            <td>@c.FullName</td>
+            <td>@c.Username</td>
+            <td>@c.Email</td>
+            <td>-</td>
+            <td>
+                <form method="post" asp-page-handler="Delete" onsubmit="return confirm('Delete this client?');">
+                    <input type="hidden" name="id" value="@c.Id" />
+                    <input type="hidden" name="type" value="client" />
+                    <button type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+    }
+
+    <!-- Tutors -->
+    @foreach (var t in Model.Tutors)
+    {
+        <tr>
+            <td>Tutor</td>
+            <td>@t.FullName</td>
+            <td>@t.Username</td>
+            <td>@t.Email</td>
+            <td>-</td>
+            <td>
+                <form method="post" asp-page-handler="Delete" onsubmit="return confirm('Delete this tutor?');">
+                    <input type="hidden" name="id" value="@t.Id" />
+                    <input type="hidden" name="type" value="tutor" />
+                    <button type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+    }
+
+    <!-- Businesses -->
+    @foreach (var b in Model.Businesses)
+    {
+        <tr>
+            <td>Business</td>
+            <td>@b.FullName</td>
+            <td>@b.Username</td>
+            <td>@b.Email</td>
+            <td>@b.Location</td>
+            <td>
+                <form method="post" asp-page-handler="Delete" onsubmit="return confirm('Delete this business?');">
+                    <input type="hidden" name="id" value="@b.Id" />
+                    <input type="hidden" name="type" value="business" />
+                    <button type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+    }
+
+    <!-- Charities -->
+    @foreach (var c in Model.Charities)
+    {
+        <tr>
+            <td>Charity</td>
+            <td>@c.FullName</td>
+            <td>@c.Username</td>
+            <td>@c.Email</td>
+            <td>@c.Location</td>
+            <td>
+                <form method="post" asp-page-handler="Delete" onsubmit="return confirm('Delete this charity?');">
+                    <input type="hidden" name="id" value="@c.Id" />
+                    <input type="hidden" name="type" value="charity" />
+                    <button type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+    }
+</table>
