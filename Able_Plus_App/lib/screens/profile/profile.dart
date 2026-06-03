@@ -14,7 +14,7 @@ import 'package:ableplusproject/widgets/AbleScaffold.dart';
 import 'package:ableplusproject/widgets/tts_wrapper.dart';
 import 'package:ableplusproject/widgets/VipBadge.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/services.dart'; 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -1601,7 +1601,7 @@ class _ProfileData {
     required this.fullName,
     required this.username,
     required this.email,
-    this.location,
+    this.location,    
     this.latitude,
     this.longitude,
     this.charityName,
@@ -1660,31 +1660,37 @@ class _ProfileData {
     }
   }
 
-  _ProfileData copyWith({String? profilePicUrl, bool? isVip, DateTime? vipExpiresAt}) {
-    return _ProfileData(
-      role: role,
-      id: id,
-      authUserId: authUserId,
-      fullName: fullName,
-      username: username,
-      email: email,
-      location: location,
-      latitude: latitude,
-      longitude: longitude,
-      charityName: charityName,
-      bio: bio,
-      subjects: subjects,
-      description: description,
-      profilePicUrl: profilePicUrl ?? this.profilePicUrl,
-      followersCount: followersCount,
-      followingCount: followingCount,
-      postsCount: postsCount,
-      averageRating: averageRating,
-      ratingCount: ratingCount,
-      isVip: isVip ?? this.isVip,
-      vipExpiresAt: vipExpiresAt ?? this.vipExpiresAt,
-    );
-  }
+  _ProfileData copyWith({
+  String? profilePicUrl,
+  bool? isVip,
+  DateTime? vipExpiresAt,
+  int? followersCount,
+  int? followingCount,
+}) {
+  return _ProfileData(
+    role: role,
+    id: id,
+    authUserId: authUserId,
+    fullName: fullName,
+    username: username,
+    email: email,
+    location: location,
+    latitude: latitude,
+    longitude: longitude,
+    charityName: charityName,
+    bio: bio,
+    subjects: subjects,
+    description: description,
+    profilePicUrl: profilePicUrl ?? this.profilePicUrl,
+    followersCount: followersCount ?? this.followersCount,
+    followingCount: followingCount ?? this.followingCount,
+    postsCount: postsCount,
+    averageRating: averageRating,
+    ratingCount: ratingCount,
+    isVip: isVip ?? this.isVip,
+    vipExpiresAt: vipExpiresAt ?? this.vipExpiresAt,
+  );
+}
 }
 
 String _tableForRole(String role) {

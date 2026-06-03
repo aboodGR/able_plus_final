@@ -57,30 +57,43 @@ class TtsService {
 
   // ── قراءة النص ────────────────────────────────────────────
   Future<void> speak(String text, {bool enabled = true, String? lang}) async {
-    if (!enabled || text.trim().isEmpty) return;
+  if (!enabled || text.trim().isEmpty) return;
 
-    final useLang = lang ?? _lang;
+  final useLang = lang ?? _lang;
 
-    // ── Web ──
-    if (kIsWeb) {
-      speakOnWeb(text, useLang); // من tts_web.dart (أو stub على mobile)
+  if (kIsWeb) {
+    speakOnWeb(text, useLang);
+    return;
+  }
+
+  if (!_isReady) await init(lang: useLang);
+
+  try {
+    final langCode = useLang == 'ar' ? 'ar-SA' : 'en-US';
+    final rate     = useLang == 'ar' ? 0.4 : 0.5;
+
+    await _engine!.setLanguage(langCode);
+    await _engine!.setSpeechRate(rate);
+    await _engine!.stop();
+
+    // قسّم النص لجمل واقرأهم بالترتيب
+    final sentences = text
+        .split(RegExp(r'(?<=[.،؟!])\s*'))
+        .where((s) => s.trim().isNotEmpty)
+        .toList();
+
+    if (sentences.isEmpty) {
+      await _engine!.speak(text);
       return;
     }
 
-    // ── Mobile / Desktop ──
-    if (!_isReady) await init(lang: useLang);
-
-    try {
-      final langCode = useLang == 'ar' ? 'ar-SA' : 'en-US';
-      final rate     = useLang == 'ar' ? 0.4 : 0.5;
-
-      await _engine!.setLanguage(langCode);
-      await _engine!.setSpeechRate(rate);
-      await _engine!.stop();
-      await _engine!.speak(text);
-    } catch (_) {}
-  }
-
+    for (final sentence in sentences) {
+      await _engine!.speak(sentence.trim());
+      // انتظر حتى يخلص قبل ما يكمل
+      await _engine!.awaitSpeakCompletion(true);
+    }
+  } catch (_) {}
+}
   // ── إيقاف الكلام ──────────────────────────────────────────
   Future<void> stop() async {
     if (kIsWeb) {

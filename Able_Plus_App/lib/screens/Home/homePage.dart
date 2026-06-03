@@ -1,3 +1,6 @@
+// OPTION A — Compact cards + visible feed preview
+// Cards are smaller (horizontal list style), feed starts higher up.
+
 import 'dart:ui';
 
 import 'package:ableplusproject/l10n/app_localizations.dart';
@@ -23,25 +26,48 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-
-  List<_QuickCardSpec> _tilesForRole(String? role, BuildContext context, AppLocalizations l10n) {
-    final places = _QuickCardSpec(key: 'places', title: l10n.places, subtitle: l10n.verifiedAccessibility, icon: Icons.place_outlined, onTap: () => context.push('/home/places'));
-    final tutors = _QuickCardSpec(key: 'tutors', title: l10n.tutors, subtitle: l10n.learningSupport, icon: Icons.school_outlined, onTap: () => context.push('/home/tutors'));
-    final charities = _QuickCardSpec(key: 'charities', title: l10n.charities, subtitle: l10n.supportAndVolunteering, icon: Icons.volunteer_activism_outlined, onTap: () => context.push('/home/charities'));
-    final community = _QuickCardSpec(key: 'Findandshare', title: l10n.findAndShare, subtitle: l10n.questionsAndUpdates, icon: Icons.forum_outlined, onTap: () => context.push('/home/Findandshare'));
+  List<_QuickCardSpec> _tilesForRole(
+      String? role, BuildContext context, AppLocalizations l10n) {
+    final places = _QuickCardSpec(
+        key: 'places',
+        title: l10n.places,
+        subtitle: l10n.verifiedAccessibility,
+        icon: Icons.place_outlined,
+        onTap: () => context.push('/home/places'));
+    final tutors = _QuickCardSpec(
+        key: 'tutors',
+        title: l10n.tutors,
+        subtitle: l10n.learningSupport,
+        icon: Icons.school_outlined,
+        onTap: () => context.push('/home/tutors'));
+    final charities = _QuickCardSpec(
+        key: 'charities',
+        title: l10n.charities,
+        subtitle: l10n.supportAndVolunteering,
+        icon: Icons.volunteer_activism_outlined,
+        onTap: () => context.push('/home/charities'));
+    final community = _QuickCardSpec(
+        key: 'Findandshare',
+        title: l10n.findAndShare,
+        subtitle: l10n.questionsAndUpdates,
+        icon: Icons.forum_outlined,
+        onTap: () => context.push('/home/Findandshare'));
     switch (role) {
-      case 'business': return [places];
-      case 'tutor': return [tutors];
-      case 'charity': return [charities];
+      case 'business':
+        return [places];
+      case 'tutor':
+        return [tutors];
+      case 'charity':
+        return [charities];
       case 'client':
-      default: return [places, tutors, charities, community];
+      default:
+        return [places, tutors, charities, community];
     }
   }
 
   @override
   void initState() {
     super.initState();
-    // ── اقرأ محتوى الصفحة لما تفتح ──
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!ref.read(ttsEnabledProvider)) return;
       final l10n = AppLocalizations.of(context);
@@ -71,9 +97,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final isDark = AbleTheme.isDark(context);
 
     final titleColor = isDark ? AbleColors.darkText : AbleColors.lightText;
-    final accentColor = isDark ? AbleColors.darkSecondary : AbleColors.lightPrimaryDark;
+    final accentColor =
+        isDark ? AbleColors.darkSecondary : AbleColors.lightPrimaryDark;
 
-    final viewerRole = viewerAsync.maybeWhen(data: (v) => v?.role, orElse: () => null);
+    final viewerRole =
+        viewerAsync.maybeWhen(data: (v) => v?.role, orElse: () => null);
     final tiles = _tilesForRole(viewerRole, context, l10n);
 
     return AbleScaffold(
@@ -84,56 +112,82 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         TtsWrapper(
           text: l10n.notifications,
           child: IconButton(
-          onPressed: () {
-            context.push('/home/notifications');
-            ref.invalidate(unreadNotificationsProvider);
-          },
-          icon: Consumer(
-            builder: (context, ref, _) {
-              final unread = ref.watch(unreadNotificationsProvider);
-              final count = unread.maybeWhen(data: (v) => v, orElse: () => 0);
-              return Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  const Icon(Icons.notifications_none_rounded),
-                  if (count > 0)
-                    Positioned.directional(
-                      textDirection: Directionality.of(context),
-                      end: -6, top: -4,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                        constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: isDark ? const Color(0xFF101828) : Colors.white, width: 1.5),
-                        ),
-                        child: Text(count > 99 ? '99+' : '$count', textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w800, height: 1.1)),
-                      ),
-                    ),
-                ],
-              );
+            onPressed: () {
+              context.push('/home/notifications');
+              ref.invalidate(unreadNotificationsProvider);
             },
+            icon: Consumer(
+              builder: (context, ref, _) {
+                final unread = ref.watch(unreadNotificationsProvider);
+                final count =
+                    unread.maybeWhen(data: (v) => v, orElse: () => 0);
+                return Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    const Icon(Icons.notifications_none_rounded),
+                    if (count > 0)
+                      Positioned.directional(
+                        textDirection: Directionality.of(context),
+                        end: -6,
+                        top: -4,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 5, vertical: 2),
+                          constraints: const BoxConstraints(
+                              minWidth: 18, minHeight: 18),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                                color: isDark
+                                    ? const Color(0xFF101828)
+                                    : Colors.white,
+                                width: 1.5),
+                          ),
+                          child: Text(count > 99 ? '99+' : '$count',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                  height: 1.1)),
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
           ),
-        ),
         ),
         TtsWrapper(
           text: l10n.profile,
           child: IconButton(
-          onPressed: () => context.push('/profile'),
-          icon: Consumer(
-            builder: (context, ref, _) {
-              final viewerAsync = ref.watch(viewerProvider);
-              final imageUrl = viewerAsync.maybeWhen(data: (v) => v?.profileImage, orElse: () => null);
-              return CircleAvatar(
-                radius: 14,
-                backgroundColor: isDark ? Colors.white.withOpacity(0.10) : const Color(0xFFE8F7FC),
-                backgroundImage: imageUrl != null && imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
-                child: imageUrl == null || imageUrl.isEmpty ? Text('A', style: TextStyle(color: accentColor, fontWeight: FontWeight.w700, fontSize: 12)) : null,
-              );
-            },
+            onPressed: () => context.push('/profile'),
+            icon: Consumer(
+              builder: (context, ref, _) {
+                final viewerAsync = ref.watch(viewerProvider);
+                final imageUrl = viewerAsync.maybeWhen(
+                    data: (v) => v?.profileImage, orElse: () => null);
+                return CircleAvatar(
+                  radius: 14,
+                  backgroundColor: isDark
+                      ? Colors.white.withOpacity(0.10)
+                      : const Color(0xFFE8F7FC),
+                  backgroundImage:
+                      imageUrl != null && imageUrl.isNotEmpty
+                          ? NetworkImage(imageUrl)
+                          : null,
+                  child: imageUrl == null || imageUrl.isEmpty
+                      ? Text('A',
+                          style: TextStyle(
+                              color: accentColor,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12))
+                      : null,
+                );
+              },
+            ),
           ),
-        ),
         ),
       ],
       body: RefreshIndicator(
@@ -145,24 +199,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           data: (items) => ListView(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
             children: [
-              // ── Quick Cards مع TTS ──
+              // ── Compact horizontal cards ──
               _QuickCardsSection(tiles: tiles, lang: lang),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
 
               // ── Feed Header ──
               TtsWrapper(
-                text: '${l10n.communityFeed}. ${(currentFilter == FeedFilter.following && viewerRole == 'client') ? l10n.postsFromFollowing : l10n.latestPosts}',
+                text:
+                    '${l10n.communityFeed}. ${(currentFilter == FeedFilter.following && viewerRole == 'client') ? l10n.postsFromFollowing : l10n.latestPosts}',
                 child: Column(children: [
-                  Text(l10n.communityFeed, textAlign: TextAlign.center, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: titleColor)),
-                  const SizedBox(height: 6),
+                  Text(l10n.communityFeed,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: titleColor)),
+                  const SizedBox(height: 4),
                   Text(
-                    (currentFilter == FeedFilter.following && viewerRole == 'client') ? l10n.postsFromFollowing : l10n.latestPosts,
+                    (currentFilter == FeedFilter.following &&
+                            viewerRole == 'client')
+                        ? l10n.postsFromFollowing
+                        : l10n.latestPosts,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 14, color: isDark ? AbleColors.darkTextMuted : AbleColors.lightTextMuted),
+                    style: TextStyle(
+                        fontSize: 13,
+                        color: isDark
+                            ? AbleColors.darkTextMuted
+                            : AbleColors.lightTextMuted),
                   ),
                 ]),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 12),
 
               // ── Filter Chips ──
               Row(
@@ -173,7 +240,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     child: _FilterChipButton(
                       label: l10n.all,
                       selected: currentFilter == FeedFilter.all,
-                      onTap: () { ref.read(feedFilterProvider.notifier).state = FeedFilter.all; ref.invalidate(postsProvider); },
+                      onTap: () {
+                        ref.read(feedFilterProvider.notifier).state =
+                            FeedFilter.all;
+                        ref.invalidate(postsProvider);
+                      },
                     ),
                   ),
                   if (viewerRole == 'client') ...[
@@ -183,37 +254,62 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       child: _FilterChipButton(
                         label: l10n.following,
                         selected: currentFilter == FeedFilter.following,
-                        onTap: () { ref.read(feedFilterProvider.notifier).state = FeedFilter.following; ref.invalidate(postsProvider); },
+                        onTap: () {
+                          ref.read(feedFilterProvider.notifier).state =
+                              FeedFilter.following;
+                          ref.invalidate(postsProvider);
+                        },
                       ),
                     ),
                   ],
                 ],
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 16),
 
               // ── Empty State ──
               if (items.isEmpty)
                 Container(
                   padding: const EdgeInsets.all(28),
                   decoration: BoxDecoration(
-                    color: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.92),
+                    color: isDark
+                        ? Colors.white.withOpacity(0.05)
+                        : Colors.white.withOpacity(0.92),
                     borderRadius: BorderRadius.circular(28),
-                    border: Border.all(color: isDark ? Colors.white.withOpacity(0.06) : Colors.white.withOpacity(0.75)),
+                    border: Border.all(
+                        color: isDark
+                            ? Colors.white.withOpacity(0.06)
+                            : Colors.white.withOpacity(0.75)),
                   ),
                   child: Column(children: [
-                    Icon(Icons.forum_outlined, size: 48, color: accentColor),
+                    Icon(Icons.forum_outlined,
+                        size: 48, color: accentColor),
                     const SizedBox(height: 16),
-                    Text(currentFilter == FeedFilter.following ? l10n.noFollowingPostsYet : l10n.noPostsYet, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: titleColor)),
+                    Text(
+                        currentFilter == FeedFilter.following
+                            ? l10n.noFollowingPostsYet
+                            : l10n.noPostsYet,
+                        style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            color: titleColor)),
                     const SizedBox(height: 8),
-                    Text(currentFilter == FeedFilter.following ? l10n.followToSeePosts : l10n.createFirstPost, textAlign: TextAlign.center, style: TextStyle(color: isDark ? AbleColors.darkTextMuted : AbleColors.lightTextMuted)),
+                    Text(
+                        currentFilter == FeedFilter.following
+                            ? l10n.followToSeePosts
+                            : l10n.createFirstPost,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            color: isDark
+                                ? AbleColors.darkTextMuted
+                                : AbleColors.lightTextMuted)),
                   ]),
                 ),
 
               // ── Posts ──
               ...items.map((post) => Padding(
-                padding: const EdgeInsets.only(bottom: 14),
-                child: PostCard(post: post),
-              )),
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: PostCard(post: post),
+                  )),
             ],
           ),
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -223,9 +319,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: 100),
               const Icon(Icons.error_outline, size: 50, color: Colors.red),
               const SizedBox(height: 16),
-              Text(l10n.somethingWentWrong, textAlign: TextAlign.center, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: titleColor)),
+              Text(l10n.somethingWentWrong,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      color: titleColor)),
               const SizedBox(height: 8),
-              Text(error.toString(), textAlign: TextAlign.center, style: TextStyle(color: isDark ? AbleColors.darkTextMuted : AbleColors.lightTextMuted)),
+              Text(error.toString(),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      color: isDark
+                          ? AbleColors.darkTextMuted
+                          : AbleColors.lightTextMuted)),
             ],
           ),
         ),
@@ -235,12 +341,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 }
 
 class _QuickCardSpec {
-  const _QuickCardSpec({required this.key, required this.title, required this.subtitle, required this.icon, required this.onTap});
+  const _QuickCardSpec(
+      {required this.key,
+      required this.title,
+      required this.subtitle,
+      required this.icon,
+      required this.onTap});
   final String key, title, subtitle;
   final IconData icon;
   final VoidCallback onTap;
 }
 
+// ── Option A: compact 2-column grid with smaller cards ──
 class _QuickCardsSection extends StatelessWidget {
   const _QuickCardsSection({required this.tiles, required this.lang});
   final List<_QuickCardSpec> tiles;
@@ -250,48 +362,59 @@ class _QuickCardsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     if (tiles.isEmpty) return const SizedBox.shrink();
 
-    // ── كل كارد ملفوف بـ TtsWrapper ──
-    Widget wrap(_QuickCardSpec spec, {bool centered = true, bool compact = false}) =>
-        TtsWrapper(
+    Widget wrap(_QuickCardSpec spec) => TtsWrapper(
           text: '${spec.title}: ${spec.subtitle}',
-          child: _QuickCard.fromSpec(spec, centered: centered, compact: compact),
+          child: _QuickCard.fromSpec(spec),
         );
 
-    if (tiles.length == 1) return SizedBox(height: 160, child: wrap(tiles.first));
+    if (tiles.length == 1) {
+      return SizedBox(height: 100, child: wrap(tiles.first));
+    }
 
-    if (tiles.length == 2) return SizedBox(
-      height: 140,
-      child: Row(children: [
-        Expanded(child: wrap(tiles[0])),
-        const SizedBox(width: 12),
-        Expanded(child: wrap(tiles[1])),
-      ]),
-    );
+    if (tiles.length == 2) {
+      return SizedBox(
+        height: 100,
+        child: Row(children: [
+          Expanded(child: wrap(tiles[0])),
+          const SizedBox(width: 10),
+          Expanded(child: wrap(tiles[1])),
+        ]),
+      );
+    }
 
-    if (tiles.length == 3) return Column(children: [
-      SizedBox(height: 140, child: Row(children: [
-        Expanded(child: wrap(tiles[0])),
-        const SizedBox(width: 12),
-        Expanded(child: wrap(tiles[1])),
-      ])),
-      const SizedBox(height: 12),
-      SizedBox(height: 120, child: wrap(tiles[2])),
-    ]);
+    if (tiles.length == 3) {
+      return Column(children: [
+        SizedBox(
+          height: 100,
+          child: Row(children: [
+            Expanded(child: wrap(tiles[0])),
+            const SizedBox(width: 10),
+            Expanded(child: wrap(tiles[1])),
+          ]),
+        ),
+        const SizedBox(height: 10),
+        SizedBox(height: 100, child: wrap(tiles[2])),
+      ]);
+    }
 
+    // 4 tiles — compact 2×2 grid with reduced aspect ratio
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       crossAxisCount: 2,
-      mainAxisSpacing: 12,
-      crossAxisSpacing: 12,
-      childAspectRatio: 1.05,
-      children: tiles.map((s) => wrap(s, compact: true)).toList(),
+      mainAxisSpacing: 10,
+      crossAxisSpacing: 10,
+      childAspectRatio: 1.7, // wider than tall → much shorter cards
+      children: tiles.map(wrap).toList(),
     );
   }
 }
 
 class _FilterChipButton extends StatelessWidget {
-  const _FilterChipButton({required this.label, required this.selected, required this.onTap});
+  const _FilterChipButton(
+      {required this.label,
+      required this.selected,
+      required this.onTap});
   final String label;
   final bool selected;
   final VoidCallback onTap;
@@ -299,68 +422,112 @@ class _FilterChipButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = AbleTheme.isDark(context);
-    final primaryColor = isDark ? AbleColors.darkSecondary : AbleColors.lightPrimaryDark;
-    final textColor = selected ? Colors.white : AbleTheme.textPrimary(context);
+    final primaryColor =
+        isDark ? AbleColors.darkSecondary : AbleColors.lightPrimaryDark;
+    final textColor =
+        selected ? Colors.white : AbleTheme.textPrimary(context);
     return InkWell(
       borderRadius: BorderRadius.circular(999),
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: selected ? primaryColor : AbleTheme.glassCard(context),
+          color:
+              selected ? primaryColor : AbleTheme.glassCard(context),
           borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: selected ? primaryColor : AbleTheme.glassBorder(context)),
+          border: Border.all(
+              color: selected
+                  ? primaryColor
+                  : AbleTheme.glassBorder(context)),
         ),
-        child: Text(label, style: TextStyle(color: textColor, fontWeight: FontWeight.w700)),
+        child: Text(label,
+            style: TextStyle(
+                color: textColor, fontWeight: FontWeight.w700)),
       ),
     );
   }
 }
 
 class _QuickCard extends StatelessWidget {
-  const _QuickCard({required this.title, required this.subtitle, required this.icon, required this.onTap, this.centered = false, this.compact = false});
+  const _QuickCard(
+      {required this.title,
+      required this.subtitle,
+      required this.icon,
+      required this.onTap});
 
-  factory _QuickCard.fromSpec(_QuickCardSpec spec, {bool centered = false, bool compact = false}) =>
-      _QuickCard(title: spec.title, subtitle: spec.subtitle, icon: spec.icon, onTap: spec.onTap, centered: centered, compact: compact);
+  factory _QuickCard.fromSpec(_QuickCardSpec spec) => _QuickCard(
+      title: spec.title,
+      subtitle: spec.subtitle,
+      icon: spec.icon,
+      onTap: spec.onTap);
 
   final String title, subtitle;
   final IconData icon;
   final VoidCallback onTap;
-  final bool centered, compact;
 
   @override
   Widget build(BuildContext context) {
     final isDark = AbleTheme.isDark(context);
-    final iconBg = isDark ? Colors.white.withOpacity(0.08) : const Color(0xFFE8F7FC);
-    final iconColor = isDark ? AbleColors.darkSecondary : AbleColors.lightPrimaryDark;
-    final titleColor = isDark ? AbleColors.darkText : AbleColors.lightText;
-    final subtitleColor = isDark ? AbleColors.darkTextMuted : AbleColors.lightTextMuted;
-    final iconBoxSize = compact ? 44.0 : 56.0;
-    final iconSize = compact ? 24.0 : 30.0;
-    final titleSize = compact ? 14.0 : 18.0;
-    final subtitleSize = compact ? 11.5 : 13.0;
-
-    final stack = Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: centered ? MainAxisAlignment.center : MainAxisAlignment.start,
-      crossAxisAlignment: centered ? CrossAxisAlignment.center : CrossAxisAlignment.start,
-      children: [
-        Container(width: iconBoxSize, height: iconBoxSize, decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(compact ? 14 : 18)), child: Icon(icon, color: iconColor, size: iconSize)),
-        const SizedBox(height: 12),
-        Text(title, textAlign: centered ? TextAlign.center : TextAlign.start, style: TextStyle(fontWeight: FontWeight.w700, color: titleColor, fontSize: titleSize)),
-        const SizedBox(height: 4),
-        Text(subtitle, textAlign: centered ? TextAlign.center : TextAlign.start, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(color: subtitleColor, fontSize: subtitleSize)),
-      ],
-    );
+    final iconBg = isDark
+        ? Colors.white.withOpacity(0.08)
+        : const Color(0xFFE8F7FC);
+    final iconColor =
+        isDark ? AbleColors.darkSecondary : AbleColors.lightPrimaryDark;
+    final titleColor =
+        isDark ? AbleColors.darkText : AbleColors.lightText;
+    final subtitleColor =
+        isDark ? AbleColors.darkTextMuted : AbleColors.lightTextMuted;
 
     return InkWell(
-      borderRadius: BorderRadius.circular(22),
+      borderRadius: BorderRadius.circular(18),
       onTap: onTap,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(18),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-          child: Card(child: Padding(padding: EdgeInsets.all(compact ? 12 : 14), child: centered ? Center(child: stack) : stack)),
+          child: Card(
+            margin: EdgeInsets.zero,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 12, vertical: 10),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: iconBg,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(icon, color: iconColor, size: 22),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(title,
+                            style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13,
+                                color: titleColor)),
+                        const SizedBox(height: 2),
+                        Text(subtitle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                                fontSize: 11, color: subtitleColor)),
+                      ],
+                    ),
+                  ),
+                  Icon(Icons.chevron_right_rounded,
+                      color: subtitleColor, size: 18),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );

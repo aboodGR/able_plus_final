@@ -1373,27 +1373,7 @@ class _PostCardState extends ConsumerState<PostCard> {
                                 const SizedBox(width: 6),
                                 const VipBadge(compact: true),
                               ],
-                              if (showFollowUi &&
-                                  !followState.isLoading &&
-                                  followState.isFollowing) ...[
-                                const SizedBox(width: 6),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 6, vertical: 1),
-                                  decoration: BoxDecoration(
-                                    color: primaryColor.withOpacity(0.12),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Text(
-                                    l10n.following,
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w600,
-                                      color: primaryColor,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                             
                             ],
                           ),
                         ],

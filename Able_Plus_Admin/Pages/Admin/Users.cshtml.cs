@@ -6,25 +6,25 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using System.Data;
 using System.Net;
-using System.Net.Http.Headers;     
+using System.Net.Http.Headers;
 
 namespace AblePlusAdmin.Pages.Admin
 {
     public class UsersModel : PageModel
     {
         private readonly AppDbContext _context;
-private readonly IConfiguration _configuration;
-private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IConfiguration _configuration;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-public UsersModel(
-    AppDbContext context,
-    IConfiguration configuration,
-    IHttpClientFactory httpClientFactory)
-{
-    _context = context;
-    _configuration = configuration;
-    _httpClientFactory = httpClientFactory;
-}
+        public UsersModel(
+            AppDbContext context,
+            IConfiguration configuration,
+            IHttpClientFactory httpClientFactory)
+        {
+            _context = context;
+            _configuration = configuration;
+            _httpClientFactory = httpClientFactory;
+        }
 
         public List<Tutor> Tutors { get; set; } = new();
         public List<Business> Businesses { get; set; } = new();
@@ -52,25 +52,21 @@ public UsersModel(
                     rolePlural = "clients";
                     roleIdColumn = "client_id";
                     break;
-
                 case "tutor":
                     roleSingular = "tutor";
                     rolePlural = "tutors";
                     roleIdColumn = "tutor_id";
                     break;
-
                 case "business":
                     roleSingular = "business";
                     rolePlural = "businesses";
                     roleIdColumn = "business_id";
                     break;
-
                 case "charity":
                     roleSingular = "charity";
                     rolePlural = "charities";
                     roleIdColumn = "charity_id";
                     break;
-
                 default:
                     return RedirectToPage();
             }
@@ -82,7 +78,6 @@ public UsersModel(
             {
                 var u = await _context.Clients.FindAsync(id);
                 if (u == null) return RedirectToPage();
-
                 authUserId = u.AuthUserId;
                 userEmail = u.Email;
             }
@@ -90,7 +85,6 @@ public UsersModel(
             {
                 var u = await _context.Tutors.FindAsync(id);
                 if (u == null) return RedirectToPage();
-
                 authUserId = u.AuthUserId;
                 userEmail = u.Email;
             }
@@ -98,7 +92,6 @@ public UsersModel(
             {
                 var u = await _context.Businesses.FindAsync(id);
                 if (u == null) return RedirectToPage();
-
                 authUserId = u.AuthUserId;
                 userEmail = u.Email;
             }
@@ -106,241 +99,171 @@ public UsersModel(
             {
                 var u = await _context.Charities.FindAsync(id);
                 if (u == null) return RedirectToPage();
-
                 authUserId = u.AuthUserId;
                 userEmail = u.Email;
             }
 
+            if (!authUserId.HasValue)
+            {
+                ModelState.AddModelError(string.Empty,
+                    "This user does not have auth_user_id, so Supabase Auth cannot be deleted.");
+                await OnGetAsync();
+                return Page();
+            }
+
             string idText = id.ToString();
-            string? authUserIdText = authUserId?.ToString();
+            string authUserIdText = authUserId.Value.ToString();
 
             using var tx = await _context.Database.BeginTransactionAsync();
 
             try
             {
-                await DeleteIfTableExistsAsync(
-                    "media",
-                    $"DELETE FROM media WHERE post_id IN " +
-                    $"(SELECT id FROM posts WHERE {roleIdColumn}::text = {{0}})",
+                // جلب أسماء الجداول مرة واحدة
+                var tables = await GetExistingTablesAsync(tx);
+
+                // حذف كل البيانات المرتبطة
+                await Del(tables, "media",
+                    $"DELETE FROM media WHERE post_id IN (SELECT id FROM posts WHERE {roleIdColumn}::text = {{0}})",
                     idText);
 
-                await DeleteIfTableExistsAsync(
-                    "media",
+                await Del(tables, "media",
                     $"DELETE FROM media WHERE {roleIdColumn}::text = {{0}}",
                     idText);
 
-                await DeleteIfTableExistsAsync(
-                    "post_likes",
+                await Del(tables, "post_likes",
                     $"DELETE FROM post_likes WHERE {roleIdColumn}::text = {{0}}",
                     idText);
 
-                await DeleteIfTableExistsAsync(
-                    "post_likes",
-                    $"DELETE FROM post_likes WHERE post_id IN " +
-                    $"(SELECT id FROM posts WHERE {roleIdColumn}::text = {{0}})",
+                await Del(tables, "post_likes",
+                    $"DELETE FROM post_likes WHERE post_id IN (SELECT id FROM posts WHERE {roleIdColumn}::text = {{0}})",
                     idText);
 
-                await DeleteIfTableExistsAsync(
-                    "post_comments",
+                await Del(tables, "post_comments",
                     $"DELETE FROM post_comments WHERE {roleIdColumn}::text = {{0}}",
                     idText);
 
-                await DeleteIfTableExistsAsync(
-                    "post_comments",
-                    $"DELETE FROM post_comments WHERE post_id IN " +
-                    $"(SELECT id FROM posts WHERE {roleIdColumn}::text = {{0}})",
+                await Del(tables, "post_comments",
+                    $"DELETE FROM post_comments WHERE post_id IN (SELECT id FROM posts WHERE {roleIdColumn}::text = {{0}})",
                     idText);
 
-                await DeleteIfTableExistsAsync(
-                    "post_reports",
+                await Del(tables, "post_reports",
                     "DELETE FROM post_reports WHERE reported_by::text = {0}",
                     idText);
 
-                await DeleteIfTableExistsAsync(
-                    "post_reports",
-                    $"DELETE FROM post_reports WHERE post_id IN " +
-                    $"(SELECT id FROM posts WHERE {roleIdColumn}::text = {{0}})",
+                await Del(tables, "post_reports",
+                    $"DELETE FROM post_reports WHERE post_id IN (SELECT id FROM posts WHERE {roleIdColumn}::text = {{0}})",
                     idText);
 
-                await DeleteIfTableExistsAsync(
-                    "posts",
+                await Del(tables, "posts",
                     $"DELETE FROM posts WHERE {roleIdColumn}::text = {{0}}",
                     idText);
 
-                await DeleteIfTableExistsAsync(
-                    "community_posts",
+                await Del(tables, "community_posts",
                     "DELETE FROM community_posts WHERE account_id::text = {0} AND lower(account_type) IN ({1}, {2})",
                     idText, roleSingular, rolePlural);
 
-                if (!string.IsNullOrWhiteSpace(authUserIdText))
-                {
-                    await DeleteIfTableExistsAsync(
-                        "community_posts",
-                        "DELETE FROM community_posts WHERE user_id::text = {0}",
-                        authUserIdText);
-                }
+                await Del(tables, "community_posts",
+                    "DELETE FROM community_posts WHERE user_id::text = {0}",
+                    authUserIdText);
 
                 if (type == "client")
-                {
-                    await DeleteIfTableExistsAsync(
-                        "follows",
+                    await Del(tables, "follows",
                         "DELETE FROM follows WHERE follower_client_id::text = {0} OR followed_client_id::text = {0}",
                         idText);
-                }
                 else if (type == "tutor")
-                {
-                    await DeleteIfTableExistsAsync(
-                        "follows",
+                    await Del(tables, "follows",
                         "DELETE FROM follows WHERE followed_tutor_id::text = {0}",
                         idText);
-                }
                 else if (type == "business")
-                {
-                    await DeleteIfTableExistsAsync(
-                        "follows",
+                    await Del(tables, "follows",
                         "DELETE FROM follows WHERE followed_business_id::text = {0}",
                         idText);
-                }
                 else if (type == "charity")
-                {
-                    await DeleteIfTableExistsAsync(
-                        "follows",
+                    await Del(tables, "follows",
                         "DELETE FROM follows WHERE followed_charity_id::text = {0}",
                         idText);
-                }
 
-                await DeleteIfTableExistsAsync(
-                    "user_reports",
+                await Del(tables, "user_reports",
                     "DELETE FROM user_reports WHERE reported_by::text = {0}",
                     idText);
 
-                await DeleteIfTableExistsAsync(
-                    "user_reports",
+                await Del(tables, "user_reports",
                     "DELETE FROM user_reports WHERE reported_user_id::text = {0}",
                     idText);
 
                 if (type == "client")
                 {
-                    await DeleteIfTableExistsAsync(
-                        "business_ratings",
-                        "DELETE FROM business_ratings WHERE client_id::text = {0}",
-                        idText);
-
-                    await DeleteIfTableExistsAsync(
-                        "tutor_ratings",
-                        "DELETE FROM tutor_ratings WHERE client_id::text = {0}",
-                        idText);
-
-                    await DeleteIfTableExistsAsync(
-                        "charity_ratings",
-                        "DELETE FROM charity_ratings WHERE client_id::text = {0}",
-                        idText);
+                    await Del(tables, "business_ratings",
+                        "DELETE FROM business_ratings WHERE client_id::text = {0}", idText);
+                    await Del(tables, "tutor_ratings",
+                        "DELETE FROM tutor_ratings WHERE client_id::text = {0}", idText);
+                    await Del(tables, "charity_ratings",
+                        "DELETE FROM charity_ratings WHERE client_id::text = {0}", idText);
                 }
                 else if (type == "business")
-                {
-                    await DeleteIfTableExistsAsync(
-                        "business_ratings",
-                        "DELETE FROM business_ratings WHERE business_id::text = {0}",
-                        idText);
-                }
+                    await Del(tables, "business_ratings",
+                        "DELETE FROM business_ratings WHERE business_id::text = {0}", idText);
                 else if (type == "tutor")
-                {
-                    await DeleteIfTableExistsAsync(
-                        "tutor_ratings",
-                        "DELETE FROM tutor_ratings WHERE tutor_id::text = {0}",
-                        idText);
-                }
+                    await Del(tables, "tutor_ratings",
+                        "DELETE FROM tutor_ratings WHERE tutor_id::text = {0}", idText);
                 else if (type == "charity")
-                {
-                    await DeleteIfTableExistsAsync(
-                        "charity_ratings",
-                        "DELETE FROM charity_ratings WHERE charity_id::text = {0}",
-                        idText);
-                }
+                    await Del(tables, "charity_ratings",
+                        "DELETE FROM charity_ratings WHERE charity_id::text = {0}", idText);
 
-                await DeleteIfTableExistsAsync(
-                    "messages",
+                await Del(tables, "messages",
                     "DELETE FROM messages WHERE sender_id::text = {0} AND sender_type = {1}",
                     idText, roleSingular);
 
-                await DeleteIfTableExistsAsync(
-                    "conversations",
+                await Del(tables, "conversations",
                     "DELETE FROM conversations WHERE " +
                     "(participant_a_id::text = {0} AND participant_a_type = {1}) OR " +
                     "(participant_b_id::text = {0} AND participant_b_type = {1})",
                     idText, roleSingular);
 
-                await DeleteIfTableExistsAsync(
-                    "user_blocks",
+                await Del(tables, "user_blocks",
                     "DELETE FROM user_blocks WHERE " +
                     "(blocker_id::text = {0} AND blocker_type = {1}) OR " +
                     "(blocked_id::text = {0} AND blocked_type = {1})",
                     idText, roleSingular);
 
-                if (!string.IsNullOrWhiteSpace(authUserIdText))
-                {
-                    await DeleteIfTableExistsAsync(
-                        "notifications",
-                        "DELETE FROM notifications WHERE receiver_id::text = {0} OR related_user_id::text = {0}",
-                        authUserIdText);
+                await Del(tables, "notifications",
+                    "DELETE FROM notifications WHERE receiver_id::text = {0} OR related_user_id::text = {0}",
+                    authUserIdText);
 
-                    await DeleteIfTableExistsAsync(
-                        "support_messages",
-                        "DELETE FROM support_messages WHERE user_id::text = {0}",
-                        authUserIdText);
+                await Del(tables, "support_messages",
+                    "DELETE FROM support_messages WHERE user_id::text = {0}",
+                    authUserIdText);
 
-                    await DeleteIfTableExistsAsync(
-                        "user_preferences",
-                        "DELETE FROM user_preferences WHERE user_id::text = {0}",
-                        authUserIdText);
-                }
+                await Del(tables, "user_preferences",
+                    "DELETE FROM user_preferences WHERE user_id::text = {0}",
+                    authUserIdText);
 
-                await DeleteIfTableExistsAsync(
-                    "profiles",
+                await Del(tables, "profiles",
                     $"DELETE FROM profiles WHERE {roleIdColumn}::text = {{0}}",
                     idText);
 
-                await DeleteIfTableExistsAsync(
-                    "admin_requests",
+                await Del(tables, "admin_requests",
                     $"DELETE FROM admin_requests WHERE {roleIdColumn}::text = {{0}}",
                     idText);
 
                 if (!string.IsNullOrWhiteSpace(userEmail))
                 {
-                    await DeleteIfTableExistsAsync(
-                        "pending_tutor_requests",
-                        "DELETE FROM pending_tutor_requests WHERE email = {0}",
-                        userEmail);
-
-                    await DeleteIfTableExistsAsync(
-                        "pending_business_requests",
-                        "DELETE FROM pending_business_requests WHERE email = {0}",
-                        userEmail);
-
-                    await DeleteIfTableExistsAsync(
-                        "pending_charity_requests",
-                        "DELETE FROM pending_charity_requests WHERE email = {0}",
-                        userEmail);
+                    await Del(tables, "pending_tutor_requests",
+                        "DELETE FROM pending_tutor_requests WHERE email = {0}", userEmail);
+                    await Del(tables, "pending_business_requests",
+                        "DELETE FROM pending_business_requests WHERE email = {0}", userEmail);
+                    await Del(tables, "pending_charity_requests",
+                        "DELETE FROM pending_charity_requests WHERE email = {0}", userEmail);
                 }
 
-                if (!string.IsNullOrWhiteSpace(authUserIdText))
-                {
-                    await DeleteIfTableExistsAsync(
-                        "pending_tutor_requests",
-                        "DELETE FROM pending_tutor_requests WHERE auth_user_id::text = {0}",
-                        authUserIdText);
+                await Del(tables, "pending_tutor_requests",
+                    "DELETE FROM pending_tutor_requests WHERE auth_user_id::text = {0}", authUserIdText);
+                await Del(tables, "pending_business_requests",
+                    "DELETE FROM pending_business_requests WHERE auth_user_id::text = {0}", authUserIdText);
+                await Del(tables, "pending_charity_requests",
+                    "DELETE FROM pending_charity_requests WHERE auth_user_id::text = {0}", authUserIdText);
 
-                    await DeleteIfTableExistsAsync(
-                        "pending_business_requests",
-                        "DELETE FROM pending_business_requests WHERE auth_user_id::text = {0}",
-                        authUserIdText);
-
-                    await DeleteIfTableExistsAsync(
-                        "pending_charity_requests",
-                        "DELETE FROM pending_charity_requests WHERE auth_user_id::text = {0}",
-                        authUserIdText);
-                }
-
+                // حذف السجل الرئيسي
                 if (type == "client")
                 {
                     var u = await _context.Clients.FindAsync(id);
@@ -364,36 +287,17 @@ public UsersModel(
 
                 await _context.SaveChangesAsync();
 
-                // Delete from Authentication / AspNetUsers
-                // Delete from Supabase Authentication / auth.users
-// Delete from Supabase Authentication / auth.users
-if (authUserId.HasValue)
-{
-    var deleteAuthResult = await DeleteSupabaseAuthUserAsync(authUserId.Value);
+                // حذف من Supabase Auth
+                var deleteAuthResult = await DeleteSupabaseAuthUserAsync(authUserId.Value);
 
-    if (!deleteAuthResult.Success)
-    {
-        await tx.RollbackAsync();
-
-        ModelState.AddModelError(
-            string.Empty,
-            deleteAuthResult.ErrorMessage ?? "Failed to delete user from Supabase Auth");
-
-        await OnGetAsync();
-        return Page();
-    }
-}
-else
-{
-    await tx.RollbackAsync();
-
-    ModelState.AddModelError(
-        string.Empty,
-        "This user does not have auth_user_id, so Supabase Auth cannot be deleted.");
-
-    await OnGetAsync();
-    return Page();
-}
+                if (!deleteAuthResult.Success)
+                {
+                    await tx.RollbackAsync();
+                    ModelState.AddModelError(string.Empty,
+                        deleteAuthResult.ErrorMessage ?? "Failed to delete user from Supabase Auth");
+                    await OnGetAsync();
+                    return Page();
+                }
 
                 await tx.CommitAsync();
                 return RedirectToPage();
@@ -405,95 +309,86 @@ else
             }
         }
 
-        private async Task<(bool Success, string? ErrorMessage)> DeleteSupabaseAuthUserAsync(Guid authUserId)
-{
-    var supabaseUrl = _configuration["Supabase:Url"]?.TrimEnd('/');
-    var serviceRoleKey = _configuration["Supabase:ServiceRoleKey"];
-
-    if (string.IsNullOrWhiteSpace(supabaseUrl) ||
-        string.IsNullOrWhiteSpace(serviceRoleKey))
-    {
-        return (false, "Missing Supabase Url or ServiceRoleKey in configuration.");
-    }
-
-    var client = _httpClientFactory.CreateClient();
-
-    using var request = new HttpRequestMessage(
-        HttpMethod.Delete,
-        $"{supabaseUrl}/auth/v1/admin/users/{authUserId}");
-
-    request.Headers.Add("apikey", serviceRoleKey);
-    request.Headers.Authorization =
-        new AuthenticationHeaderValue("Bearer", serviceRoleKey);
-
-    var response = await client.SendAsync(request);
-    var body = await response.Content.ReadAsStringAsync();
-
-    if (response.IsSuccessStatusCode)
-    {
-        return (true, null);
-    }
-
-    if (response.StatusCode == HttpStatusCode.NotFound)
-    {
-        return (false, $"Supabase Auth user was not found for auth_user_id={authUserId}.");
-    }
-
-    return (
-        false,
-        $"Supabase Auth delete failed: {(int)response.StatusCode} {response.ReasonPhrase}. {body}"
-    );
-}
-
-        private async Task DeleteIfTableExistsAsync(string tableName, string deleteSql, params object[] parameters)
-        {
-            if (await TableExistsAsync(tableName))
-            {
-                await _context.Database.ExecuteSqlRawAsync(deleteSql, parameters);
-            }
-        }
-
-        private async Task<bool> TableExistsAsync(string tableName)
+        // استعلام واحد يجيب كل الجداول الموجودة
+        private async Task<HashSet<string>> GetExistingTablesAsync(IDbContextTransaction tx)
         {
             var connection = _context.Database.GetDbConnection();
             var shouldClose = connection.State != ConnectionState.Open;
 
             if (shouldClose)
-            {
                 await connection.OpenAsync();
-            }
 
             try
             {
                 using var command = connection.CreateCommand();
-
-                if (_context.Database.CurrentTransaction != null)
-                {
-                    command.Transaction = _context.Database.CurrentTransaction.GetDbTransaction();
-                }
-
+                command.Transaction = tx.GetDbTransaction();
                 command.CommandText =
-                    "SELECT EXISTS (" +
-                    "SELECT 1 FROM information_schema.tables " +
-                    "WHERE table_schema = 'public' AND table_name = @tableName" +
-                    ")";
+                    "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'";
 
-                var parameter = command.CreateParameter();
-                parameter.ParameterName = "@tableName";
-                parameter.Value = tableName;
-                command.Parameters.Add(parameter);
+                var tables = new HashSet<string>();
+                using var reader = await command.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                    tables.Add(reader.GetString(0));
 
-                var result = await command.ExecuteScalarAsync();
-
-                return result is bool exists && exists;
+                return tables;
             }
             finally
             {
                 if (shouldClose)
-                {
                     await connection.CloseAsync();
-                }
+            }
+        }
+
+        // تنفيذ DELETE فقط إذا الجدول موجود
+        private async Task Del(HashSet<string> tables, string tableName, string sql, params object[] parameters)
+        {
+            if (tables.Contains(tableName))
+                await _context.Database.ExecuteSqlRawAsync(sql, parameters);
+        }
+
+        private async Task<(bool Success, string? ErrorMessage)> DeleteSupabaseAuthUserAsync(Guid authUserId)
+        {
+            var supabaseUrl = _configuration["Supabase:Url"]?.TrimEnd('/');
+            var serviceRoleKey = _configuration["Supabase:ServiceRoleKey"];
+
+            if (string.IsNullOrWhiteSpace(supabaseUrl) || string.IsNullOrWhiteSpace(serviceRoleKey))
+                return (false, "Missing Supabase Url or ServiceRoleKey in configuration.");
+
+            var client = _httpClientFactory.CreateClient();
+            client.Timeout = TimeSpan.FromSeconds(15);
+
+            try
+            {
+                using var request = new HttpRequestMessage(
+                    HttpMethod.Delete,
+                    $"{supabaseUrl}/auth/v1/admin/users/{authUserId}");
+
+                request.Headers.Add("apikey", serviceRoleKey);
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", serviceRoleKey);
+
+                var response = await client.SendAsync(request);
+
+                // نجاح، أو المستخدم مش موجود أصلاً في Auth = نكمل
+                if (response.IsSuccessStatusCode || response.StatusCode == HttpStatusCode.NotFound)
+                    return (true, null);
+
+                // 504 = Supabase استقبل الطلب بس ما رد بوقت = نكمل
+                if ((int)response.StatusCode == 504)
+                    return (true, null);
+
+                var body = await response.Content.ReadAsStringAsync();
+                return (false, $"Supabase Auth delete failed: {(int)response.StatusCode} {response.ReasonPhrase}. {body}");
+            }
+            catch (TaskCanceledException)
+            {
+                // Timeout = نكمل ونعتبره محذوف
+                return (true, null);
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Supabase Auth request error: {ex.Message}");
             }
         }
     }
 }
+

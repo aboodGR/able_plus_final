@@ -401,30 +401,37 @@ class _MyActivityScreenState extends ConsumerState<MyActivityScreen>
                     color: accentColor.withOpacity(0.18),
                     borderRadius: BorderRadius.circular(14),
                   ),
+                  indicatorSize: TabBarIndicatorSize.tab,
                   labelColor: accentColor,
                   unselectedLabelColor: mutedColor,
                   labelStyle: const TextStyle(
-                    fontSize: 13,
+                    fontSize: 12,
                     fontWeight: FontWeight.w700,
                   ),
                   unselectedLabelStyle: const TextStyle(
-                    fontSize: 13,
+                    fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
+                  padding: const EdgeInsets.all(4),
                   tabs: [
-                    // ── كل تاب ملفوف بـ TtsWrapper ──
                     TtsWrapper(
                       text: '${l10n.comments}'
                           '${comments.isNotEmpty ? ", ${comments.length}" : ""}',
                       child: Tab(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.mode_comment_outlined, size: 16),
-                            const SizedBox(width: 5),
-                            Text(l10n.comments),
+                            const Icon(Icons.mode_comment_outlined, size: 15),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                l10n.comments,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
                             if (comments.isNotEmpty) ...[
-                              const SizedBox(width: 4),
+                              const SizedBox(width: 3),
                               _Badge(count: comments.length),
                             ],
                           ],
@@ -437,12 +444,18 @@ class _MyActivityScreenState extends ConsumerState<MyActivityScreen>
                       child: Tab(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.favorite_rounded, size: 16),
-                            const SizedBox(width: 5),
-                            Text(l10n.likes),
+                            const Icon(Icons.favorite_rounded, size: 15),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                l10n.likes,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
                             if (likes.isNotEmpty) ...[
-                              const SizedBox(width: 4),
+                              const SizedBox(width: 3),
                               _Badge(count: likes.length),
                             ],
                           ],
@@ -455,12 +468,18 @@ class _MyActivityScreenState extends ConsumerState<MyActivityScreen>
                       child: Tab(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.bookmark_rounded, size: 16),
-                            const SizedBox(width: 5),
-                            Text(l10n.saved),
+                            const Icon(Icons.bookmark_rounded, size: 15),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                l10n.saved,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
                             if (saves.isNotEmpty) ...[
-                              const SizedBox(width: 4),
+                              const SizedBox(width: 3),
                               _Badge(count: saves.length),
                             ],
                           ],
@@ -512,15 +531,15 @@ class _Badge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
       decoration: BoxDecoration(
         color: AbleTheme.accent(context).withOpacity(0.25),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
         count > 99 ? '99+' : '$count',
         style: TextStyle(
-          fontSize: 10,
+          fontSize: 9,
           fontWeight: FontWeight.w700,
           color: AbleTheme.accent(context),
         ),
@@ -595,7 +614,6 @@ class _ActivityList extends StatelessWidget {
           final subtitle = _subtitleFor(l10n, item);
           final timeStr = _formatTime(l10n, item.createdAt);
 
-          // ── النص المقروء: العنوان + الـ subtitle + الوقت ──
           final ttsText = [
             title,
             if (subtitle.isNotEmpty) subtitle,
